@@ -16,6 +16,7 @@ public class CurseforgeUpdateThread extends Thread {
             channelID = URL.split(";;")[1];
         } else channelID = Main.cfg.DefaultChannel;
         proj = CurseProject.fromURL(URL.split(";;")[0]);
+        setName("Curseforge Update Detector for " + proj.title());
     }
 
     @Override
@@ -32,6 +33,7 @@ public class CurseforgeUpdateThread extends Thread {
                             .setTimestamp(proj.latestFile().uploadTime())
                             .build();
                     try {
+                        //noinspection ConstantConditions
                         Main.jda.getTextChannelById(channelID).sendMessage(b).complete();
                     } catch (NullPointerException ignored) {
                     }
