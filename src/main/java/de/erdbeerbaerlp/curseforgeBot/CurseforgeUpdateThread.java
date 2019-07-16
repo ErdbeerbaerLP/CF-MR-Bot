@@ -12,11 +12,11 @@ public class CurseforgeUpdateThread extends Thread {
     private final CurseProject proj;
     private final String channelID;
 
-    CurseforgeUpdateThread(String URL) throws CurseException {
-        if (URL.contains(";;")) {
-            channelID = URL.split(";;")[1];
+    CurseforgeUpdateThread(String id) throws CurseException {
+        if (id.contains(";;")) {
+            channelID = id.split(";;")[1];
         } else channelID = Main.cfg.DefaultChannel;
-        proj = CurseProject.fromURL(URL.split(";;")[0]);
+        proj = CurseProject.fromID(id.split(";;")[0]);
         setName("Curseforge Update Detector for " + proj.title());
     }
 
@@ -29,7 +29,7 @@ public class CurseforgeUpdateThread extends Thread {
     public void run() {
         while (true) {
             try {
-                System.out.println("[" + proj.title() + "]" + proj.latestFile().id());
+                Main.logger.debug("  [" + proj.title() + "]" + proj.latestFile().id());
                 if (Main.cfg.isNewFile(proj.title(), proj.latestFile().id())) {
                     MessageEmbed b = new EmbedBuilder()
                             .setThumbnail(proj.thumbnailURLString())
@@ -48,6 +48,7 @@ public class CurseforgeUpdateThread extends Thread {
                 }
                 sleep(TimeUnit.SECONDS.toMillis(10));
                 proj.reloadFiles();
+                proj.reload();
             } catch (InterruptedException | CurseException ignored) {
             }
         }

@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class Cfg {
@@ -12,32 +13,57 @@ public class Cfg {
     public static final File cacheFile = new File("Caches_DONT-DELETE");
     private final Config conf;
     public String BOT_TOKEN;
-    public List<String> URLS;
+    public List<String> IDs;
     public String DefaultChannel;
+    //public List<String> USERs;
 
     Cfg() {
-        try {
             if (!configFile.exists()) {
+                //noinspection finally
+                try {
+                    InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
+                    Files.copy(link, configFile.getAbsoluteFile().toPath());
+                    link.close();
+                    System.err.println("Please set the token and the Channel ID in the new config file");
+                } catch (IOException e) {
+                    System.err.println("Could not extract default config file");
+                    e.printStackTrace();
+                } finally {
+                    System.exit(0);
+                }
+            }
+
+        conf = ConfigFactory.parseFile(configFile);
+        if (!conf.hasPath("ver") || conf.getInt("ver") != Main.CFG_VERSION) {
+            //noinspection finally
+            try {
+                System.err.println("Resetting config, creaing backup...");
+                Files.move(configFile.toPath(), Paths.get(configFile.getAbsolutePath() + ".backup.txt"));
                 InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
                 Files.copy(link, configFile.getAbsoluteFile().toPath());
+                link.close();
+                System.err.println("Reset completed! Please reconfigurate.");
+            } catch (IOException e) {
+                System.err.println("Could not reset config file!");
+                e.printStackTrace();
+            } finally {
+                System.exit(0);
             }
-        } catch (IOException e) {
-            System.err.println("Could not extract default config file");
-            e.printStackTrace();
         }
-        conf = ConfigFactory.parseFile(configFile);
         loadConfig();
     }
 
     public void loadConfig() {
         BOT_TOKEN = conf.getString("BotToken");
-        URLS = conf.getStringList("URLs");
+        IDs = conf.getStringList("ids");
         DefaultChannel = conf.getString("DefaultChannelID");
+        //USERs = conf.getStringList("users");
     }
 
     void saveCache() {
         try {
-            if (!cacheFile.exists()) cacheFile.createNewFile();
+            if (!cacheFile.exists()) //noinspection ResultOfMethodCallIgnored
+                cacheFile.createNewFile();
             PrintWriter out = new PrintWriter(cacheFile);
             Main.cache.forEach((a, b) -> out.println(a + ";;" + b));
             out.close();
