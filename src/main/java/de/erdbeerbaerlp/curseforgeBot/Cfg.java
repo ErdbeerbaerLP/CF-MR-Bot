@@ -65,6 +65,7 @@ public class Cfg {
     }
 
     boolean isNewFile(String name, int id) {
+        if (!Main.cache.containsKey(name)) return true;
         return Main.cache.get(name) < id;
     }
 }
