@@ -37,7 +37,7 @@ public class Cfg {
         if (!conf.hasPath("ver") || conf.getInt("ver") != Main.CFG_VERSION) {
             //noinspection finally
             try {
-                System.err.println("Resetting config, creaing backup...");
+                System.err.println("Resetting config, creating backup...");
                 Files.move(configFile.toPath(), Paths.get(configFile.getAbsolutePath() + ".backup.txt"));
                 InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
                 Files.copy(link, configFile.getAbsoluteFile().toPath());
