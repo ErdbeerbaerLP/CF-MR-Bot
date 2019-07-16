@@ -1,6 +1,7 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
 
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ArrayUtils;
@@ -26,6 +27,7 @@ public class Main {
 
         //Disable log spam if not debugging
         if (!debug) Logging.getLogger().disableDebug();
+        CurseAPI.setMaximumThreads(6);
         if (cfg.BOT_TOKEN.equals("InsertHere") || cfg.DefaultChannel.equals("000000000")) {
             System.err.println("You didnt modify the config! This bot wont work without Channel ID or Token!");
             System.exit(1);

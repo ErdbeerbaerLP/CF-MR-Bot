@@ -33,10 +33,10 @@ public class CurseforgeUpdateThread extends Thread {
                 if (Main.cfg.isNewFile(proj.title(), proj.latestFile().id())) {
                     MessageEmbed b = new EmbedBuilder()
                             .setThumbnail(proj.thumbnailURLString())
-                            .setTitle(proj.title())
-                            .setDescription("New File detected for project " + proj.title() + "\n\nFile Name: `" + proj.latestFile().name() + "`\nChangelog:\n```\n" + formatChangelog(proj.latestFile().changelog()) + "\n```")
+                            .setDescription("New File detected for project " + proj.title() + "\n\n**File Name**: `" + proj.latestFile().name() + "`\n**Game Version(s)**: " + proj.latestFile().gameVersionStrings() + "\n**Changelog**:\n```\n" + formatChangelog(proj.latestFile().changelog()) + "\n```")
                             .setFooter("Upload time: ")
                             .setTimestamp(proj.latestFile().uploadTime())
+                            .setAuthor(proj.title(), proj.urlString())
                             .build();
                     try {
                         //noinspection ConstantConditions
