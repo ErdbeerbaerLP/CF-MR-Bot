@@ -2,9 +2,12 @@ package de.erdbeerbaerlp.curseforgeBot;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.kohsuke.github.GHContent;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -15,30 +18,37 @@ public class Cfg {
     public String BOT_TOKEN;
     public List<String> IDs;
     public String DefaultChannel;
+    public String githubToken;
+    public String githubRepo;
     //public List<String> USERs;
 
     Cfg() {
-            if (!configFile.exists()) {
-                //noinspection finally
-                try {
-                    InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
-                    Files.copy(link, configFile.getAbsoluteFile().toPath());
-                    link.close();
-                    System.err.println("Please set the token and the Channel ID in the new config file");
-                } catch (IOException e) {
-                    System.err.println("Could not extract default config file");
-                    e.printStackTrace();
-                } finally {
-                    System.exit(0);
-                }
+        if (!configFile.exists()) {
+            //noinspection finally
+            try {
+                InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
+                Files.copy(link, configFile.getAbsoluteFile().toPath());
+                link.close();
+                System.err.println("Please set the token and the Channel ID in the new config file");
+            } catch (IOException e) {
+                System.err.println("Could not extract default config file");
+                e.printStackTrace();
+            } finally {
+                System.exit(0);
             }
+        }
 
         conf = ConfigFactory.parseFile(configFile);
         if (!conf.hasPath("ver") || conf.getInt("ver") != Main.CFG_VERSION) {
             //noinspection finally
             try {
-                System.err.println("Resetting config, creating backup...");
-                Files.move(configFile.toPath(), Paths.get(configFile.getAbsolutePath() + ".backup.txt"));
+                Main.logger.info("Resetting config, creating backup...");
+                final Path backupPath = Paths.get(configFile.getAbsolutePath() + ".backup.txt");
+                if (backupPath.toFile().exists()) {
+                    Main.logger.info("REPLACING OLD BACKUP!!!!");
+                    backupPath.toFile().delete();
+                }
+                Files.move(configFile.toPath(), backupPath);
                 InputStream link = (getClass().getResourceAsStream("/" + configFile.getName()));
                 Files.copy(link, configFile.getAbsoluteFile().toPath());
                 link.close();
@@ -57,36 +67,84 @@ public class Cfg {
         BOT_TOKEN = conf.getString("BotToken");
         IDs = conf.getStringList("ids");
         DefaultChannel = conf.getString("DefaultChannelID");
+        githubToken = conf.getString("githubToken");
+        githubRepo = conf.getString("githubRepo");
         //USERs = conf.getStringList("users");
     }
 
     void saveCache() {
+        Main.logger.debug("Attempting to save cache...");
         try {
             if (!cacheFile.exists()) //noinspection ResultOfMethodCallIgnored
                 cacheFile.createNewFile();
-            PrintWriter out = new PrintWriter(cacheFile);
+            final PrintWriter out = new PrintWriter(cacheFile);
             Main.cache.forEach((a, b) -> out.println(a + ";;" + b));
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.logger.fatalError("Failed to save cache file!+\n" + e.getMessage());
+        }
+        try {
+            if (Main.useGithub && Main.repo != null) {
+                Main.logger.debug("Pushing to github repo...");
+                if (doesGHCacheExist())
+                    Main.repo.createContent()
+                            .branch("master")
+                            .message("Update caches")
+                            .path("caches.txt")
+                            .sha(getGHCache().getSha())
+                            .content(Files.readAllBytes(cacheFile.toPath()))
+                            .commit();
+                else
+                    Main.repo.createContent()
+                            .branch("master")
+                            .message("Update caches")
+                            .path("caches.txt")
+                            .content(Files.readAllBytes(cacheFile.toPath()))
+                            .commit();
+                cacheFile.delete();
+            }
+        } catch (IOException e) {
+            Main.logger.fatalError("Error pushing to github!\n" + e.getMessage());
         }
     }
 
+    boolean doesGHCacheExist() throws IOException {
+        return Main.github.searchContent().filename("caches").extension("txt").repo(Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().getTotalCount() > 0;
+    }
+
+    @Nullable
+    GHContent getGHCache() throws IOException {
+        if (!doesGHCacheExist()) return null;
+        return Main.github.searchContent().filename("caches").extension("txt").repo(Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().asList().get(0);
+    }
+
     void loadCache() {
-        try {
-            BufferedReader r = new BufferedReader(new FileReader(cacheFile));
-            r.lines().forEach((s -> {
-                final String[] ca = s.split(";;");
-                if (ca.length != 2) {
-                    System.err.println("Could not load cache line " + s);
-                    return;
-                }
-                Main.cache.put(ca[0], Integer.parseInt(ca[1]));
-            }));
-            r.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Main.useGithub && Main.repo != null)
+            try {
+                BufferedReader s = new BufferedReader(new InputStreamReader(Main.repo.getFileContent("caches.txt").read()));
+                s.lines().forEach(this::putToCache);
+                s.close();
+            } catch (IOException e) {
+                Main.logger.fatalError("Could not load caches!\n" + e.getMessage());
+            }
+        else
+            try {
+                BufferedReader r = new BufferedReader(new FileReader(cacheFile));
+                r.lines().forEach(this::putToCache);
+                r.close();
+            } catch (IOException e) {
+                Main.logger.fatalError("Could not load caches!\n" + e.getMessage());
+            }
+
+    }
+
+    private void putToCache(String s) {
+        final String[] ca = s.split(";;");
+        if (ca.length != 2) {
+            System.err.println("Could not load cache line " + s);
+            return;
         }
+        Main.cache.put(ca[0], Integer.parseInt(ca[1]));
 
     }
 

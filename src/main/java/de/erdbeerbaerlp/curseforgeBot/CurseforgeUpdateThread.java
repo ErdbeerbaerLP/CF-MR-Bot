@@ -17,19 +17,27 @@ public class CurseforgeUpdateThread extends Thread {
             channelID = id.split(";;")[1];
         } else channelID = Main.cfg.DefaultChannel;
         proj = CurseProject.fromID(id.split(";;")[0]);
-        setName("Curseforge Update Detector for " + proj.title());
+        setName("Curseforge Update Detector for " + proj.title() + " (ID: " + proj.id() + ")");
     }
 
     private String formatChangelog(String s) {
-        final String string = Processor.process(s).replace("<br>", "\n").replaceAll("(?s)<[^>]*>(<[^>]*>)*", "");
-        return string.replaceAll("https.*?\\s", "");
+        String string = Processor.process(s).replace("<br>", "\n").replaceAll("(?s)<[^>]*>(<[^>]*>)*", "");
+        string = string.replaceAll("https.*?\\s", "");
+        String out = "";
+        int additionalLines = 0;
+        for (final String st : string.split("\n")) {
+            if ((out + st.trim() + "\n").length() > 1000) {
+                additionalLines++;
+            } else out = out + st.trim() + "\n";
+        }
+        return out + (additionalLines > 0 ? ("... And " + additionalLines + " more lines") : "");
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Main.logger.debug("  [" + proj.title() + "]" + proj.latestFile().id());
+                Main.logger.debug("<" + proj.title() + "> Cached: " + Main.cache.get(proj.title()) + " Newest:" + proj.latestFile().id());
                 if (Main.cfg.isNewFile(proj.title(), proj.latestFile().id())) {
                     MessageEmbed b = new EmbedBuilder()
                             .setThumbnail(proj.thumbnailURLString())
@@ -44,7 +52,7 @@ public class CurseforgeUpdateThread extends Thread {
                     } catch (NullPointerException ignored) {
                     }
                     Main.cache.put(proj.title(), proj.latestFile().id());
-                    Main.cfg.saveCache();
+                    Main.cacheChanged = true;
                 }
                 sleep(TimeUnit.SECONDS.toMillis(10));
                 proj.reloadFiles();

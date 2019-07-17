@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
 }
-version = '1.0.0'
+version = '1.0.1'
 group = "de.erdbeerbaerlp.curseforgeBot" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 mainClassName = 'de.erdbeerbaerlp.curseforgeBot.Main'
 repositories {
@@ -26,6 +26,10 @@ dependencies {
     }
     embed group: 'com.typesafe', name: 'config', version: '1.3.4'
     embed 'es.nitaur.markdown:txtmark:0.16'
+    embed group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    embed(group: 'org.kohsuke', name: 'github-api', version: '1.95'){
+        exclude module: 'okhttp'
+    }
 }
 jar {
 
