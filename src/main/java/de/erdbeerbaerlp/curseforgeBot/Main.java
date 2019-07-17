@@ -127,6 +127,7 @@ public class Main {
                 }
             }*/
                 cfg.saveCache();
+                logger.info("Done!");
             } else cfg.loadCache();
             for (String p : cfg.IDs) {
                 try {
