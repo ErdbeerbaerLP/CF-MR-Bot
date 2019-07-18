@@ -23,24 +23,13 @@ public class Main {
     public static final Cfg cfg = new Cfg();
     static final Map<String, Integer> cache = new HashMap<>();
     static final int CFG_VERSION = 2;
-    static final GitHub github;
+    static GitHub github;
     static boolean cacheGenerated = Cfg.cacheFile.exists();
     static boolean debug = false;
     static boolean useGithub = false;
     static boolean cacheChanged;
     static GHRepository repo = null;
     static JDA jda;
-
-    static {
-        GitHub out;
-        try {
-            out = GitHub.connectUsingOAuth(cfg.githubToken);
-        } catch (IOException e) {
-            out = null;
-            e.printStackTrace();
-        }
-        github = out;
-    }
 
     public static void main(String[] args) {
         final Options o = new Options();
@@ -69,6 +58,12 @@ public class Main {
                 logger.debug("Took github token from command line");
             }
             if (useGithub) {
+                logger.debug("Logging in to github...");
+                try {
+                    github = GitHub.connectUsingOAuth(cfg.githubToken);
+                } catch (IOException e) {
+                    logger.fatalError("Failed to login to guthub: " + e.getMessage());
+                }
                 logger.debug("Attempting to use repository \"" + cfg.githubRepo + "\"");
                 try {
                     final PagedSearchIterable<GHRepository> tmp = github.searchRepositories().user(github.getMyself().getLogin()).list();
