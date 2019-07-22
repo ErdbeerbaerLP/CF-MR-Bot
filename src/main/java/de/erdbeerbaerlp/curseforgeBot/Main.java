@@ -148,6 +148,7 @@ public class Main {
                         cacheChanged = false;
                         cfg.saveCache();
                     }
+                    CurseAPI.clearAllCache();
                 } catch (InterruptedException e) {
                     logger.info("Main Thread interrupted!");
                 }
