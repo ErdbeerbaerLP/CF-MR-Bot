@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
 }
-version = '1.0.1'
+version = '1.0.2'
 group = "de.erdbeerbaerlp.curseforgeBot" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 mainClassName = 'de.erdbeerbaerlp.curseforgeBot.Main'
 repositories {
