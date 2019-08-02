@@ -28,7 +28,8 @@ public class CurseforgeUpdateThread extends Thread {
         for (final String st : string.split("\n")) {
             if ((out + st.trim() + "\n").length() > 1000) {
                 additionalLines++;
-            } else out = out + st.trim() + "\n";
+            } else //noinspection StringConcatenationInLoop
+                out = out + st.trim() + "\n";
         }
         return out + (additionalLines > 0 ? ("... And " + additionalLines + " more lines") : "");
     }
@@ -41,7 +42,7 @@ public class CurseforgeUpdateThread extends Thread {
                 if (Main.cfg.isNewFile(proj.title(), proj.latestFile().id())) {
                     MessageEmbed b = new EmbedBuilder()
                             .setThumbnail(proj.thumbnailURLString())
-                            .setDescription("New File detected for project " + proj.title() + "\n\n**File Name**: `" + proj.latestFile().name() + "`\n**Game Version(s)**: " + proj.latestFile().gameVersionStrings() + "\n**Changelog**:\n```\n" + formatChangelog(proj.latestFile().changelog()) + "\n```")
+                            .setDescription("New File detected for project " + proj.title() + "\n\n**File Name**: `" + proj.latestFile().name() + "`\n**Game Version**: " + proj.latestFile().gameVersionString() + "\n**Changelog**:\n```\n" + formatChangelog(proj.latestFile().changelog()) + "\n```")
                             .setFooter("Upload time: ")
                             .setTimestamp(proj.latestFile().uploadTime())
                             .setAuthor(proj.title(), proj.urlString())
