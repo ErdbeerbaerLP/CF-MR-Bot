@@ -3,20 +3,22 @@ package de.erdbeerbaerlp.curseforgeBot;
 import com.github.rjeschke.txtmark.Processor;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import okhttp3.HttpUrl;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-
 public class CurseforgeUpdateThread extends Thread
 {
     private final CurseProject proj;
     private final String channelID;
+    
     
     CurseforgeUpdateThread(String id) throws CurseException {
         if (id.contains(";;")) {
@@ -50,7 +52,7 @@ public class CurseforgeUpdateThread extends Thread
                 System.out.println("<" + proj.name() + "> Cached: " + Main.cache.get(proj.name()) + " Newest:" + proj.files().first().id());
                 if (Main.cfg.isNewFile(proj.name(), proj.files().first().id())) {
                     MessageEmbed b = new EmbedBuilder().setThumbnail(proj.avatarThumbnailURL().toString()).setDescription(
-                            "New File detected for project " + proj.name() + "\n\n**File Name**: `" + proj.files().first().displayName() + "`\n**Game Versions**: " + getGameVersions(proj) + "\n" + "**Changelog**:\n```\n" + formatChangelog(
+                            "New File detected for project " + proj.name() + "\n\n**File Name**: `" + proj.files().first().displayName() + "`\n**Game Versions**: " + getGameVersions(proj) + "\n**Download Link:** " + "[CurseForge](" + getUrl(proj) + ")\n" + "**Changelog**:\n```\n" + formatChangelog(
                                     proj.files().first().changelogPlainText()) + "\n```").setFooter("Upload time: ").setTimestamp(proj.files().first().uploadTime()).setAuthor(proj.name(), proj.url().toString()).build();
                     try {
                         //noinspection ConstantConditions
@@ -77,4 +79,20 @@ public class CurseforgeUpdateThread extends Thread
         }
         return out;
     }
+    
+    
+    /**
+     * Return the newest file curseforge page url to embed into message
+     * 
+     * @param proj
+     * @return url link to file page
+     * @throws CurseException
+     */
+    private String getUrl(final CurseProject proj) throws CurseException {
+	String urlPre = proj.url().toString();
+	int id = proj.files().first().id();
+	String out = urlPre + "/files/" + Integer.toString(id);
+	return out;
+    }
+
 }
