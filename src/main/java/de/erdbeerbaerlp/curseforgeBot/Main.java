@@ -144,6 +144,7 @@ public class Main {
                         cacheChanged = false;
                         cfg.saveCache();
                     }
+                    cfg.loadCache();
                 } catch (InterruptedException e) {
                     System.out.println("Main Thread interrupted!");
                 }

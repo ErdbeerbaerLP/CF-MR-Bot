@@ -102,6 +102,7 @@ public class Cfg {
                             .content(Files.readAllBytes(cacheFile.toPath()))
                             .commit();
                 cacheFile.delete();
+                Main.github.refreshCache();
             }
         } catch (IOException e) {
             System.err.println("Error pushing to github!\n" + e.getMessage());
