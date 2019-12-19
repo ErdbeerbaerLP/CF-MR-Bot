@@ -68,6 +68,7 @@ public class CurseforgeUpdateThread extends Thread
     }
     
     private String getGameVersions(final CurseProject proj) throws CurseException {
+        if (proj.files().first().gameVersionStrings().isEmpty()) return "UNKNOWN";
         String out = "";
         final Stream<String> stream = proj.files().first().gameVersionStrings().stream().sorted();
         for (Iterator<String> it = stream.iterator() ; it.hasNext() ; ) {
