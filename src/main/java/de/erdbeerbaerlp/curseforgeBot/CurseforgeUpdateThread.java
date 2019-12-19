@@ -14,11 +14,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-
-/**
- * @author AJ
- *
- */
 public class CurseforgeUpdateThread extends Thread
 {
     private final CurseProject proj;
