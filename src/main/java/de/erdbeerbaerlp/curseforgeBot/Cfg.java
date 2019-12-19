@@ -42,10 +42,10 @@ public class Cfg {
         if (!conf.hasPath("ver") || conf.getInt("ver") != Main.CFG_VERSION) {
             //noinspection finally
             try {
-                Main.logger.info("Resetting config, creating backup...");
+                System.out.println("Resetting config, creating backup...");
                 final Path backupPath = Paths.get(configFile.getAbsolutePath() + ".backup.txt");
                 if (backupPath.toFile().exists()) {
-                    Main.logger.info("REPLACING OLD BACKUP!!!!");
+                    System.out.println("REPLACING OLD BACKUP!!!!");
                     backupPath.toFile().delete();
                 }
                 Files.move(configFile.toPath(), backupPath);
@@ -73,7 +73,7 @@ public class Cfg {
     }
 
     void saveCache() {
-        Main.logger.debug("Attempting to save cache...");
+        System.out.println("Attempting to save cache...");
         try {
             if (!cacheFile.exists()) //noinspection ResultOfMethodCallIgnored
                 cacheFile.createNewFile();
@@ -81,11 +81,11 @@ public class Cfg {
             Main.cache.forEach((a, b) -> out.println(a + ";;" + b));
             out.close();
         } catch (IOException e) {
-            Main.logger.fatalError("Failed to save cache file!+\n" + e.getMessage());
+            System.err.println("Failed to save cache file!+\n" + e.getMessage());
         }
         try {
             if (Main.useGithub && Main.repo != null) {
-                Main.logger.debug("Pushing to github repo...");
+                System.out.println("Pushing to github repo...");
                 if (doesGHCacheExist())
                     Main.repo.createContent()
                             .branch("master")
@@ -104,7 +104,7 @@ public class Cfg {
                 cacheFile.delete();
             }
         } catch (IOException e) {
-            Main.logger.fatalError("Error pushing to github!\n" + e.getMessage());
+            System.err.println("Error pushing to github!\n" + e.getMessage());
         }
     }
 
@@ -125,7 +125,7 @@ public class Cfg {
                 s.lines().forEach(this::putToCache);
                 s.close();
             } catch (IOException e) {
-                Main.logger.fatalError("Could not load caches!\n" + e.getMessage());
+                System.err.println("Could not load caches!\n" + e.getMessage());
             }
         else
             try {
@@ -133,7 +133,7 @@ public class Cfg {
                 r.lines().forEach(this::putToCache);
                 r.close();
             } catch (IOException e) {
-                Main.logger.fatalError("Could not load caches!\n" + e.getMessage());
+                System.err.println("Could not load caches!\n" + e.getMessage());
             }
 
     }

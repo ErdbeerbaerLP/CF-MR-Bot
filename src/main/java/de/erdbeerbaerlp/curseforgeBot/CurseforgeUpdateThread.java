@@ -1,11 +1,13 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
 import com.github.rjeschke.txtmark.Processor;
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.project.CurseProject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class CurseforgeUpdateThread extends Thread {
@@ -16,8 +18,10 @@ public class CurseforgeUpdateThread extends Thread {
         if (id.contains(";;")) {
             channelID = id.split(";;")[1];
         } else channelID = Main.cfg.DefaultChannel;
-        proj = CurseProject.fromID(id.split(";;")[0]);
-        setName("Curseforge Update Detector for " + proj.title() + " (ID: " + proj.id() + ")");
+        final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(id.split(";;")[0]));
+        if (!project.isPresent()) throw new CurseException("Project not found");
+        proj = project.get();
+        setName("Curseforge Update Detector for " + proj.name() + " (ID: " + proj.id() + ")");
     }
 
     private String formatChangelog(String s) {
@@ -38,26 +42,24 @@ public class CurseforgeUpdateThread extends Thread {
     public void run() {
         while (true) {
             try {
-                Main.logger.debug("<" + proj.title() + "> Cached: " + Main.cache.get(proj.title()) + " Newest:" + proj.latestFile().id());
-                if (Main.cfg.isNewFile(proj.title(), proj.latestFile().id())) {
-                    MessageEmbed b = new EmbedBuilder()
-                            .setThumbnail(proj.thumbnailURLString())
-                            .setDescription("New File detected for project " + proj.title() + "\n\n**File Name**: `" + proj.latestFile().name() + "`\n**Game Version**: " + proj.latestFile().gameVersionString() + "\n**Changelog**:\n```\n" + formatChangelog(proj.latestFile().changelog()) + "\n```")
-                            .setFooter("Upload time: ")
-                            .setTimestamp(proj.latestFile().uploadTime())
-                            .setAuthor(proj.title(), proj.urlString())
-                            .build();
+                System.out.println("<" + proj.name() + "> Cached: " + Main.cache.get(proj.name()) + " Newest:" + proj.files().last().id());
+                if (Main.cfg.isNewFile(proj.name(), proj.files().last().id())) {
+                    MessageEmbed b = new EmbedBuilder().setThumbnail(proj.avatarThumbnailURL().toString()).setDescription(
+                            "New File detected for project " + proj.name() + "\n\n**File Name**: `" + proj.files().last().displayName() + "`\n**Game Version**: " + proj.files().last().gameVersionStrings().stream().findFirst()
+                                                                                                                                                                        .get() + "\n" + "**Changelog**:\n```\n" + formatChangelog(
+                                    proj.files().last().changelogPlainText()) + "\n```")
+                                                       .setFooter("Upload time: ").setTimestamp(proj.files().last().uploadTime()).setAuthor(proj.name(), proj.url().toString())
+                                                       .build();
                     try {
                         //noinspection ConstantConditions
                         Main.jda.getTextChannelById(channelID).sendMessage(b).complete();
                     } catch (NullPointerException ignored) {
                     }
-                    Main.cache.put(proj.title(), proj.latestFile().id());
+                    Main.cache.put(proj.name(), proj.files().last().id());
                     Main.cacheChanged = true;
                 }
                 sleep(TimeUnit.SECONDS.toMillis(10));
-                proj.reloadFiles();
-                proj.reload();
+                proj.clearFilesCache();
             } catch (InterruptedException | CurseException ignored) {
             }
         }
