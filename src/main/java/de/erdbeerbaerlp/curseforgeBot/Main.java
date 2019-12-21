@@ -103,7 +103,7 @@ public class Main {
                         final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(p.split(";;")[0]));
                         if (!project.isPresent()) throw new CurseException("Project not found");
                         final CurseProject pr = project.get();
-                        cache.put(pr.name(), pr.files().last().id());
+                        cache.put(pr.name(), pr.files().first().id());
                     } catch (CurseException e) {
                         e.printStackTrace();
                     }
