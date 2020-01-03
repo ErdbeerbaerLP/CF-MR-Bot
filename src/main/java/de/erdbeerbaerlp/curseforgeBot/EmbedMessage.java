@@ -4,12 +4,11 @@ import com.github.rjeschke.txtmark.Processor;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
-
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
 
 public class EmbedMessage {
     
@@ -129,10 +128,10 @@ public class EmbedMessage {
      * @throws CurseException
      */
     private static String getUrl(final CurseProject proj) throws CurseException {
-	String urlPre = proj.url().toString();
-	int id = proj.files().first().id();
-	String out = urlPre + "/files/" + Integer.toString(id);
-	return out;
-    }
+		String urlPre = proj.url().toString();
+		int id = proj.files().first().id();
+		String out = urlPre + "/files/" + id;
+		return out;
+	}
 }
 
