@@ -1,18 +1,13 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
-import com.github.rjeschke.txtmark.Processor;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import okhttp3.HttpUrl;
 
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
+
+import net.dv8tion.jda.api.entities.TextChannel;
 
 public class CurseforgeUpdateThread extends Thread
 {
@@ -31,34 +26,32 @@ public class CurseforgeUpdateThread extends Thread
         setName("Curseforge Update Detector for " + proj.name() + " (ID: " + proj.id() + ")");
     }
 
-    private String formatChangelog(String s) {
-        String string = Processor.process(s).replace("<br>", "\n").replaceAll("(?s)<[^>]*>(<[^>]*>)*", "");
-        string = string.replaceAll("https.*?\\s", "");
-        String out = "";
-        int additionalLines = 0;
-        for (final String st : string.split("\n")) {
-            if ((out + st.trim() + "\n").length() > 1000) {
-                additionalLines++;
-            } else //noinspection StringConcatenationInLoop
-                out = out + st.trim() + "\n";
-        }
-        return out + (additionalLines > 0 ? ("... And " + additionalLines + " more lines") : "");
-    }
-
     @Override
     public void run() {
         while (true) {
             try {
                 System.out.println("<" + proj.name() + "> Cached: " + Main.cache.get(proj.name()) + " Newest:" + proj.files().first().id());
                 if (Main.cfg.isNewFile(proj.name(), proj.files().first().id())) {
-                    MessageEmbed b = new EmbedBuilder().setThumbnail(proj.avatarThumbnailURL().toString()).setDescription(
-                            "New File detected for project " + proj.name() + "\n\n**File Name**: `" + proj.files().first().displayName() + "`\n**Game Versions**: " + getGameVersions(proj) + "\n**Download Link:** " + "[CurseForge](" + getUrl(proj) + ")\n" + "**Changelog**:\n```\n" + formatChangelog(
-                                    proj.files().first().changelogPlainText()) + "\n```").setFooter("Upload time: ").setTimestamp(proj.files().first().uploadTime()).setAuthor(proj.name(), proj.url().toString()).build();
-                    try {
-                        //noinspection ConstantConditions
-                        Main.jda.getTextChannelById(channelID).sendMessage(b).complete();
-                    } catch (NullPointerException ignored) {
-                    }
+                    TextChannel channel = Main.jda.getTextChannelById(channelID);
+                    String roleid = Main.cfg.mentionRole;
+                    if (Main.cfg.updateFileLink.equals("nolink")) {
+                	if (!roleid.equals("000000000")) {
+                    	channel.sendMessage(EmbedMessage.getRoleAsMention(roleid, channel)).queue();
+			}
+                        EmbedMessage.messageWithoutLink(proj, proj.files().first(), channel);
+		    }
+                    if (Main.cfg.updateFileLink.equals("curse")) {
+                	if (!roleid.equals("000000000")) {
+                        	channel.sendMessage(EmbedMessage.getRoleAsMention(roleid, channel)).queue();
+    			}
+                        EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
+		    }
+                    if (Main.cfg.updateFileLink.equals("direct")) {
+                	if (!roleid.equals("000000000")) {
+                        	channel.sendMessage(EmbedMessage.getRoleAsMention(roleid, channel)).queue();
+    			}
+                        EmbedMessage.messageWithDirectLink(proj, proj.files().first(), channel);
+		    }
                     Main.cache.put(proj.name(), proj.files().first().id());
                     Main.cacheChanged = true;
                 }
@@ -68,31 +61,4 @@ public class CurseforgeUpdateThread extends Thread
             }
         }
     }
-    
-    private String getGameVersions(final CurseProject proj) throws CurseException {
-        if (proj.files().first().gameVersionStrings().isEmpty()) return "UNKNOWN";
-        String out = "";
-        final Stream<String> stream = proj.files().first().gameVersionStrings().stream().sorted();
-        for (Iterator<String> it = stream.iterator() ; it.hasNext() ; ) {
-            final String s = it.next();
-            out = out + s + (it.hasNext() ? ", " : "");
-        }
-        return out;
-    }
-    
-    
-    /**
-     * Return the newest file curseforge page url to embed into message
-     * 
-     * @param proj
-     * @return url link to file page
-     * @throws CurseException
-     */
-    private String getUrl(final CurseProject proj) throws CurseException {
-	String urlPre = proj.url().toString();
-	int id = proj.files().first().id();
-	String out = urlPre + "/files/" + Integer.toString(id);
-	return out;
-    }
-
 }

@@ -20,6 +20,10 @@ public class Cfg {
     public String DefaultChannel;
     public String githubToken;
     public String githubRepo;
+    public String changlogDiscordFormat;
+    public String messageDescription;
+    public String updateFileLink;
+    public String mentionRole;
     //public List<String> USERs;
 
     Cfg() {
@@ -69,6 +73,10 @@ public class Cfg {
         DefaultChannel = conf.getString("DefaultChannelID");
         githubToken = conf.getString("githubToken");
         githubRepo = conf.getString("githubRepo");
+        changlogDiscordFormat = conf.getString("changelogDiscordFormat");
+        messageDescription = conf.getString("messageDescription");
+        updateFileLink = conf.getString("updateFileLink");
+        mentionRole = conf.getString("mentionRole");
         //USERs = conf.getStringList("users");
     }
 
