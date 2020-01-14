@@ -15,7 +15,7 @@ public class EmbedMessage {
     public static void messageWithoutLink(CurseProject proj, CurseFile file, TextChannel channel) throws CurseException {
 	EmbedBuilder embed = new EmbedBuilder();
 	embed.setTitle(proj.name(), proj.url().toString());
-	embed.setThumbnail(proj.avatarThumbnailURL().toString());
+	embed.setThumbnail(proj.logo().thumbnailURL().toString());
 	embed.setDescription(getMessageDescription());
 	embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
 		"**Release Type**: `" + file.releaseType().name() + "`" +
@@ -29,7 +29,7 @@ public class EmbedMessage {
     public static void messageWithCurseLink(CurseProject proj, CurseFile file, TextChannel channel) throws CurseException {
 	EmbedBuilder embed = new EmbedBuilder();
 	embed.setTitle(proj.name(), proj.url().toString());
-	embed.setThumbnail(proj.avatarThumbnailURL().toString());
+	embed.setThumbnail(proj.logo().thumbnailURL().toString());
 	embed.setDescription(getMessageDescription());
 	embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
 		"**Release Type**: `" + file.releaseType().name() + "`" +
@@ -44,7 +44,7 @@ public class EmbedMessage {
     public static void messageWithDirectLink(CurseProject proj, CurseFile file, TextChannel channel) throws CurseException {
 	EmbedBuilder embed = new EmbedBuilder();
 	embed.setTitle(proj.name(), proj.url().toString());
-	embed.setThumbnail(proj.avatarThumbnailURL().toString());
+	embed.setThumbnail(proj.logo().thumbnailURL().toString());
 	embed.setDescription(getMessageDescription());
 	embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
 		"**Release Type**: `" + file.releaseType().name() + "`" +
