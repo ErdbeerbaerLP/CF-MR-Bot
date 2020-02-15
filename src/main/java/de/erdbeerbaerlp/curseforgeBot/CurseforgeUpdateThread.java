@@ -22,9 +22,10 @@ public class CurseforgeUpdateThread extends Thread {
                 System.out.println(ids.length);
                 roleID = ids[2];
             }
-        } else
+        } else {
             roleID = Main.cfg.mentionRole;
-        channelID = Main.cfg.DefaultChannel;
+            channelID = Main.cfg.DefaultChannel;
+        }
         final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(id.split(";;")[0]));
         if (!project.isPresent()) throw new CurseException("Project not found");
         proj = project.get();
