@@ -4,13 +4,12 @@ import com.github.rjeschke.txtmark.Processor;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
-
-import java.util.Iterator;
-import java.util.stream.Stream;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 
 public class EmbedMessage {
@@ -199,13 +198,13 @@ public class EmbedMessage {
      * @return discord code syntax
      */
     private static String getSyntax() {
-	String md = Main.cfg.changlogDiscordFormat;
-	if (!(md == "Syntax")) {
-	    return md + "\n";
-	} else {
-	    return "\n";
+		String md = Main.cfg.changlogDiscordFormat;
+		if (!(md.equals("Syntax"))) {
+			return md + "\n";
+		} else {
+			return "\n";
+		}
 	}
-    }
 
     /**
      * Return the newest file curseforge page url to embed into message.
