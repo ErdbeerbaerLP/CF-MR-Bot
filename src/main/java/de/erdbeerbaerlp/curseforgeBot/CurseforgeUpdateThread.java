@@ -7,6 +7,7 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class CurseforgeUpdateThread extends Thread
