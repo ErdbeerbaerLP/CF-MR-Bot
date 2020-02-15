@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     public static final Cfg cfg = new Cfg();
     static final Map<String, Integer> cache = new HashMap<>();
-    static final int CFG_VERSION = 3;
+    static final int CFG_VERSION = 4;
     static GitHub github;
     static boolean cacheGenerated = Cfg.cacheFile.exists();
     static boolean debug = false;
