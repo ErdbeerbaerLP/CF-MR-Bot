@@ -140,9 +140,9 @@ public class EmbedMessage {
     private static String getMessageDescription() {
 	String desc = Main.cfg.messageDescription;
 	if (desc.length() > 500) {
-	    System.out.println(
-		    "Your messageDescription is over 500 characters, setting to default value **PLEASE CHANGE THIS**");
-	    return "New File Detected For CurseForge Project";
+		System.out.println(
+				"Your messageDescription is over 500 characters, setting to default value **PLEASE CHANGE THIS**");
+		return "New File detected For CurseForge Project";
 	} else {
 	    return desc;
 	}
