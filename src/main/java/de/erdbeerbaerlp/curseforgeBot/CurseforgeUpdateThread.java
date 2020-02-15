@@ -39,7 +39,7 @@ public class CurseforgeUpdateThread extends Thread {
                 if (Main.cfg.isNewFile(proj.name(), proj.files().first().id())) {
                     TextChannel channel = Main.jda.getTextChannelById(channelID);
                     //noinspection ConstantConditions
-                    Role role = channel.getGuild().getRoleById(roleID);
+                    Role role = roleID.isEmpty() ? null : channel.getGuild().getRoleById(roleID);
                     if (!(role == null)) {
                         EmbedMessage.sendPingableUpdateNotification(role, channel, proj);
                     } else EmbedMessage.sendUpdateNotification(channel, proj);
