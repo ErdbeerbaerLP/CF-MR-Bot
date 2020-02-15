@@ -43,8 +43,8 @@ public class Main {
             // parse the command line arguments
             CommandLine line = parser.parse(o, args);
             debug = line.hasOption("debug");
-    
-    
+
+
             System.out.println("Cought command line args!");
             useGithub = line.hasOption("github");
             System.out.println("Using github: " + useGithub);

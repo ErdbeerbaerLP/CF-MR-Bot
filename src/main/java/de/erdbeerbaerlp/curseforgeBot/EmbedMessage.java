@@ -116,7 +116,7 @@ public class EmbedMessage {
      * Send update notification.
      *
      * @param channel the channel
-     * @param proj the proj
+     * @param proj    the proj
      * @throws CurseException the curse exception
      */
     public static void sendUpdateNotification(TextChannel channel, CurseProject proj) throws CurseException {
@@ -176,6 +176,7 @@ public class EmbedMessage {
      * @return the game versions
      * @throws CurseException the curse exception
      */
+    @SuppressWarnings("StringConcatenationInLoop")
     private static String getGameVersions(final CurseProject proj) throws CurseException {
         if (proj.files().first().gameVersionStrings().isEmpty())
             return "UNKNOWN";
@@ -192,7 +193,7 @@ public class EmbedMessage {
      * returns the discord markdown syntax set in bot.conf this method does not
      * throw an error if syntax is not supported or if multiple syntax's are
      * specified.
-     *
+     * <p>
      * Non-supported syntax auto default to plain text in discord
      *
      * @return discord code syntax
