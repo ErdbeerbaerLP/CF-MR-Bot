@@ -216,7 +216,6 @@ public class EmbedMessage {
     private static String getUrl(final CurseProject proj) throws CurseException {
         String urlPre = proj.url().toString();
         int id = proj.files().first().id();
-        String out = urlPre + "/files/" + id;
-        return out;
+        return urlPre + "/files/" + id;
     }
 }
