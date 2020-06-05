@@ -1,17 +1,24 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.project.CurseProject;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.commons.cli.*;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedSearchIterable;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,8 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static final Cfg cfg = new Cfg();
-    static final Map<String, Integer> cache = new HashMap<>();
-    static final int CFG_VERSION = 4;
+    static final Map<Integer, Integer> cache = new HashMap<>();
+    static final int CFG_VERSION = 9431;
     static GitHub github;
     static boolean cacheGenerated = Cfg.cacheFile.exists();
     static boolean debug = false;
@@ -28,6 +35,10 @@ public class Main {
     static boolean cacheChanged;
     static GHRepository repo = null;
     static JDA jda;
+    static final File projectsFile = new File("projects.json");
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    static ArrayList<String> ids = new ArrayList<>();
+    static HashMap<String, CurseforgeUpdateThread> threads = new HashMap<>();
 
     public static void main(String[] args) {
         final Options o = new Options();
@@ -83,11 +94,10 @@ public class Main {
                 }
 
             }
-            if (cfg.BOT_TOKEN.equals("InsertHere") || cfg.DefaultChannel.equals("000000000")) {
+            if (cfg.BOT_TOKEN.equals("InsertHere")) {
                 System.err.println("You didnt modify the config! This bot wont work without Channel ID or Token!");
                 System.exit(1);
             }
-            System.out.println("Bot-Token is " + cfg.BOT_TOKEN);
             try {
                 jda = new JDABuilder()
                         .setToken(cfg.BOT_TOKEN)
@@ -96,49 +106,40 @@ public class Main {
                 System.err.println("<JDA> " + e.getMessage());
                 System.exit(1);
             }
+            try {
+                loadJSON();
+            } catch (Exception e) {
+                System.err.println("Failed to load JSON!");
+                e.printStackTrace();
+                System.exit(1);
+            }
+            jda.addEventListener(new JdaEventListener());
             if (!cacheGenerated) {
                 System.out.println("Generating cache...");
-                for (String p : cfg.IDs) {
+                for (final String p : ids) {
                     try {
                         final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(p.split(";;")[0]));
                         if (!project.isPresent()) throw new CurseException("Project not found");
                         final CurseProject pr = project.get();
-                        cache.put(pr.name(), pr.files().first().id());
+                        cache.put(pr.id(), pr.files().first().id());
                     } catch (CurseException e) {
                         e.printStackTrace();
                     }
                 }
-            /*for (String p : cfg.USERs) {
-                try {
-                    final CurseProject pr = CurseProject.fromID(p.split(";;")[0]);
-                    cache.put(pr.title(), pr.latestFile().id());
-                    cfg.saveCache();
-                } catch (CurseException e) {
-                    e.printStackTrace();
-                }
-            }*/
                 cfg.saveCache();
                 System.out.println("Done!");
             } else cfg.loadCache();
-            for (String p : cfg.IDs) {
+            for (final String p : ids) {
                 try {
                     new CurseforgeUpdateThread(p).start();
                 } catch (CurseException e) {
+                    System.out.println("Failed to get project with ID " + p + ". If this happens more often, remove it");
                     e.printStackTrace();
                 }
             }
-        /*for (String p : cfg.USERs) {
-            try {
-                // No way to do this *now*
-                new CurseforgeUpdateThread(p).start();
-            } catch (CurseException e) {
-                e.printStackTrace();
-            }
-        }*/
             while (true) {
                 try {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(30));
-                    System.out.println("MAIN Tick");
                     if (cacheChanged) {
                         System.out.println("Saving changed caches...");
                         cacheChanged = false;
@@ -152,5 +153,58 @@ public class Main {
         } catch (ParseException exp) {
             System.err.println(exp.getMessage());
         }
+    }
+
+    private static void loadJSON() throws IOException {
+        if (!projectsFile.exists())
+            return;
+        final FileReader r = new FileReader(projectsFile);
+        ids = gson.fromJson(r, ArrayList.class);
+        r.close();
+    }
+
+    private static void saveJSON() throws IOException {
+        if (!projectsFile.exists())
+            projectsFile.createNewFile();
+        final FileWriter w = new FileWriter(projectsFile);
+        gson.toJson(ids, w);
+        w.close();
+    }
+
+    public static CurseProject addProjectFromCommand(final String projectID, final String channelID) throws CurseException, NumberFormatException, IOException {
+        final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(projectID));
+        if (!project.isPresent()) throw new CurseException("Project not found");
+        final CurseProject pr = project.get();
+        final String combinedIDString = projectID + ";;" + channelID;
+        if (ids.contains(combinedIDString)) throw new CurseException("Project already bound to channel");
+        final TextChannel channel = jda.getTextChannelById(channelID);
+        ids.add(combinedIDString);
+        try {
+            saveJSON();
+        } catch (IOException e) {
+            ids.remove(combinedIDString);
+            throw e;
+        }
+        cache.put(pr.id(), pr.files().first().id());
+        cacheChanged = true;
+        return pr;
+    }
+
+    public static boolean removeProjectFromCommand(final String projectID, final String channelID) {
+        final String combinedIDString = projectID + ";;" + channelID;
+        if (ids.contains(combinedIDString)) {
+            ids.remove(combinedIDString);
+            cache.remove(Integer.parseInt(projectID));
+            try {
+                saveJSON();
+                threads.get(projectID).interrupt();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            cacheChanged = true;
+            return true;
+        } else
+            return false;
     }
 }

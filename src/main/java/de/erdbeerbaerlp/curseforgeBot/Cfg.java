@@ -16,14 +16,14 @@ public class Cfg {
     public static final File cacheFile = new File("Caches_DONT-DELETE");
     private final Config conf;
     public String BOT_TOKEN;
-    public List<String> IDs;
-    public String DefaultChannel;
+    //public List<String> IDs;
+    public List<String> roles;
+    //public String DefaultChannel;
     public String githubToken;
     public String githubRepo;
     public String changlogDiscordFormat;
     public String messageDescription;
     public String updateFileLink;
-    public String mentionRole;
     //public List<String> USERs;
 
     Cfg() {
@@ -69,19 +69,16 @@ public class Cfg {
 
     public void loadConfig() {
         BOT_TOKEN = conf.getString("BotToken");
-        IDs = conf.getStringList("ids");
-        DefaultChannel = conf.getString("DefaultChannelID");
+        //IDs = conf.getStringList("ids");
+        //DefaultChannel = conf.getString("DefaultChannelID");
         githubToken = conf.getString("githubToken");
         githubRepo = conf.getString("githubRepo");
         changlogDiscordFormat = conf.getString("changelogDiscordFormat");
         messageDescription = conf.getString("messageDescription");
         updateFileLink = conf.getString("updateFileLink");
-        mentionRole = conf.getString("mentionRole");
-        //USERs = conf.getStringList("users");
+        roles = conf.getStringList("commandWhitelistRoleIDs");
     }
-
     void saveCache() {
-        System.out.println("Attempting to save cache...");
         try {
             if (!cacheFile.exists()) //noinspection ResultOfMethodCallIgnored
                 cacheFile.createNewFile();
@@ -153,12 +150,12 @@ public class Cfg {
             System.err.println("Could not load cache line " + s);
             return;
         }
-        Main.cache.put(ca[0], Integer.parseInt(ca[1]));
+        Main.cache.put(Integer.parseInt(ca[0]), Integer.parseInt(ca[1]));
 
     }
 
-    boolean isNewFile(String name, int id) {
-        if (!Main.cache.containsKey(name)) return true;
-        return Main.cache.get(name) < id;
+    boolean isNewFile(int projectID, int fileID) {
+        if (!Main.cache.containsKey(projectID)) return true;
+        return Main.cache.get(projectID) < fileID;
     }
 }
