@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CurseforgeUpdateThread extends Thread {
     private final CurseProject proj;
-    private String channelID;
+    private final String channelID;
     private String roleID = "";
 
     CurseforgeUpdateThread(String id) throws CurseException {
@@ -30,6 +30,7 @@ public class CurseforgeUpdateThread extends Thread {
         if (!project.isPresent()) throw new CurseException("Project not found");
         proj = project.get();
         setName("Curseforge Update Detector for " + proj.name() + " (ID: " + proj.id() + ")");
+        Main.threads.add(this);
     }
 
     @Override
@@ -48,8 +49,9 @@ public class CurseforgeUpdateThread extends Thread {
                     Main.cacheChanged = true;
                 }
                 sleep(TimeUnit.SECONDS.toMillis(10));
-                proj.clearFilesCache();
+                proj.refreshFiles();
             } catch (InterruptedException | CurseException ignored) {
+                ignored.printStackTrace();
             }
         }
     }

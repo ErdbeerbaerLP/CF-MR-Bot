@@ -12,6 +12,7 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedSearchIterable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public class Main {
     static final Map<String, Integer> cache = new HashMap<>();
     static final int CFG_VERSION = 4;
     static GitHub github;
+    static ArrayList<CurseforgeUpdateThread> threads = new ArrayList<>();
     static boolean cacheGenerated = Cfg.cacheFile.exists();
     static boolean debug = false;
     static boolean useGithub = false;
@@ -139,6 +141,7 @@ public class Main {
                 try {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(30));
                     System.out.println("MAIN Tick");
+                    System.out.println(threads);
                     if (cacheChanged) {
                         System.out.println("Saving changed caches...");
                         cacheChanged = false;
