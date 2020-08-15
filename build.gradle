@@ -16,7 +16,7 @@ configurations {
     compile.extendsFrom(embed)
 }
 dependencies {
-    embed('net.dv8tion:JDA:4.1.0_92'){
+    embed('net.dv8tion:JDA:4.2.0_168'){
         transitive = true
         exclude module: 'opus-java'
 
