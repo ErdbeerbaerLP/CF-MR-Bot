@@ -37,22 +37,24 @@ public class CurseforgeUpdateThread extends Thread {
     public void run() {
         while (true) {
             try {
-                System.out.println("<" + proj.name() + "> Cached: " + Main.cache.get(proj.name()) + " Newest:" + proj.files().first().id());
-                if (Main.cfg.isNewFile(proj.name(), proj.files().first().id())) {
+                if (Main.debug)
+                    System.out.println("<" + proj.name() + "> Cached: " + Main.cache.get(proj.id()) + " Newest:" + proj.files().first().id());
+                if (Main.cfg.isNewFile(proj.id(), proj.files().first().id())) {
                     TextChannel channel = Main.jda.getTextChannelById(channelID);
                     //noinspection ConstantConditions
-                    Role role = roleID.isEmpty() ? null : channel.getGuild().getRoleById(roleID);
-                    if (!(role == null)) {
+                    final Role role = roleID.isEmpty() ? null : channel.getGuild().getRoleById(roleID);
+                    if (role != null) {
                         EmbedMessage.sendPingableUpdateNotification(role, channel, proj);
                     } else EmbedMessage.sendUpdateNotification(channel, proj);
-                    Main.cache.put(proj.name(), proj.files().first().id());
+                    Main.cache.put(proj.id(), proj.files().first().id());
                     Main.cacheChanged = true;
                 }
-                sleep(TimeUnit.SECONDS.toMillis(10));
+                sleep(TimeUnit.SECONDS.toMillis(30));
                 proj.refreshFiles();
-            } catch (InterruptedException | CurseException ignored) {
-                ignored.printStackTrace();
+            } catch (InterruptedException | CurseException e) {
+                e.printStackTrace();
             }
         }
     }
+
 }

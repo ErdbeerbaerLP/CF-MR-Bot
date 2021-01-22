@@ -1,5 +1,8 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
+import com.therandomlabs.curseapi.CurseAPI;
+import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.project.CurseProject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.kohsuke.github.GHContent;
@@ -10,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 public class Cfg {
     public static final File configFile = new File("bot.conf");
@@ -118,13 +122,13 @@ public class Cfg {
     }
 
     boolean doesGHCacheExist() throws IOException {
-        return Main.github.searchContent().filename("caches").extension("txt").repo(Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().getTotalCount() > 0;
+        return Main.github.searchContent().filename("caches").repo(Main.github.getMyself().getLogin() + "/" + Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().getTotalCount() > 0;
     }
 
     @Nullable
     GHContent getGHCache() throws IOException {
         if (!doesGHCacheExist()) return null;
-        return Main.github.searchContent().filename("caches").extension("txt").repo(Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().asList().get(0);
+        return Main.github.searchContent().filename("caches").extension("txt").repo(Main.github.getMyself().getLogin() + "/" + Main.repo.getName()).user(Main.github.getMyself().getLogin()).list().toList().get(0);
     }
 
     void loadCache() {
@@ -153,12 +157,31 @@ public class Cfg {
             System.err.println("Could not load cache line " + s);
             return;
         }
-        Main.cache.put(ca[0], Integer.parseInt(ca[1]));
+        int id = -1;
+        try {
+            id = Integer.parseInt(ca[0]);
+        } catch (NumberFormatException e) {
+            System.out.println("Converting project name '" + ca[0] + "' from cache to ID...");
+            try {
+
+                for (String p : Main.cfg.IDs) {
+                    final Optional<CurseProject> oProj = CurseAPI.project(Integer.parseInt(p.split(";;")[0]));
+                    if (oProj.isPresent()) {
+                        final CurseProject proj = oProj.get();
+                        if (proj.name().equals(ca[0])) id = proj.id();
+                    }
+                }
+                Thread.sleep(2000);
+            } catch (CurseException | InterruptedException ignored) {
+            }
+            if (id == -1) System.out.println("Cannot find project");
+        }
+        Main.cache.put(id, Integer.parseInt(ca[1]));
 
     }
 
-    boolean isNewFile(String name, int id) {
-        if (!Main.cache.containsKey(name)) return true;
-        return Main.cache.get(name) < id;
+    boolean isNewFile(int projID, int fileID) {
+        if (!Main.cache.containsKey(projID)) return true;
+        return Main.cache.get(projID) < fileID;
     }
 }

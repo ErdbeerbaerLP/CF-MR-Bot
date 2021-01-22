@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static final Cfg cfg = new Cfg();
-    static final Map<String, Integer> cache = new HashMap<>();
+    static final Map<Integer, Integer> cache = new HashMap<Integer, Integer>();
     static final int CFG_VERSION = 4;
     static GitHub github;
     static ArrayList<CurseforgeUpdateThread> threads = new ArrayList<>();
@@ -105,7 +105,7 @@ public class Main {
                         final Optional<CurseProject> project = CurseAPI.project(Integer.parseInt(p.split(";;")[0]));
                         if (!project.isPresent()) throw new CurseException("Project not found");
                         final CurseProject pr = project.get();
-                        cache.put(pr.name(), pr.files().first().id());
+                        cache.put(pr.id(), pr.files().first().id());
                     } catch (CurseException e) {
                         e.printStackTrace();
                     }
@@ -139,9 +139,8 @@ public class Main {
         }*/
             while (true) {
                 try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(30));
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(60));
                     System.out.println("MAIN Tick");
-                    System.out.println(threads);
                     if (cacheChanged) {
                         System.out.println("Saving changed caches...");
                         cacheChanged = false;
