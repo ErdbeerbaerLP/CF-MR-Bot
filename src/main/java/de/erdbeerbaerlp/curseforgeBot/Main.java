@@ -121,7 +121,10 @@ public class Main {
             }*/
                 cfg.saveCache();
                 System.out.println("Done!");
-            } else cfg.loadCache();
+            } else {
+                cfg.loadCache();
+                if (cacheChanged) cfg.saveCache();
+            }
             for (String p : cfg.IDs) {
                 try {
                     new CurseforgeUpdateThread(p).start();

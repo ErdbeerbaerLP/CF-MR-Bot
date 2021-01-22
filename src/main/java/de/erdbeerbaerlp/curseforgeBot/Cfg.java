@@ -163,12 +163,14 @@ public class Cfg {
         } catch (NumberFormatException e) {
             System.out.println("Converting project name '" + ca[0] + "' from cache to ID...");
             try {
-
                 for (String p : Main.cfg.IDs) {
                     final Optional<CurseProject> oProj = CurseAPI.project(Integer.parseInt(p.split(";;")[0]));
                     if (oProj.isPresent()) {
                         final CurseProject proj = oProj.get();
-                        if (proj.name().equals(ca[0])) id = proj.id();
+                        if (proj.name().equals(ca[0])) {
+                            id = proj.id();
+                            Main.cacheChanged = true;
+                        }
                     }
                 }
                 Thread.sleep(2000);
