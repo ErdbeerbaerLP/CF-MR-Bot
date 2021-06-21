@@ -27,7 +27,7 @@ dependencies {
     embed group: 'com.typesafe', name: 'config', version: '1.4.1'
     embed 'es.nitaur.markdown:txtmark:0.16'
     embed group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    embed(group: 'org.kohsuke', name: 'github-api', version: '1.128'){
+    embed(group: 'org.kohsuke', name: 'github-api', version: '1.131'){
         exclude module: 'okhttp'
     }
 }
