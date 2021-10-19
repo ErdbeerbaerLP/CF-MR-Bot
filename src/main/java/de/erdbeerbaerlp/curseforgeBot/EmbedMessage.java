@@ -7,6 +7,7 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -97,19 +98,11 @@ public class EmbedMessage {
      * @throws CurseException the curse exception
      */
     public static void sendPingableUpdateNotification(Role role, TextChannel channel, CurseProject proj)
-            throws CurseException {
-        if (Main.cfg.updateFileLink.equals("nolink")) {
-            channel.sendMessage(role.getAsMention()).queue();
-            EmbedMessage.messageWithoutLink(proj, proj.files().first(), channel);
-        }
-        if (Main.cfg.updateFileLink.equals("curse")) {
-            channel.sendMessage(role.getAsMention()).queue();
-            EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
-        }
-        if (Main.cfg.updateFileLink.equals("direct")) {
-            channel.sendMessage(role.getAsMention()).queue();
-            EmbedMessage.messageWithDirectLink(proj, proj.files().first(), channel);
-        }
+            throws CurseException, InsufficientPermissionException {
+
+        channel.sendMessage(role.getAsMention()).queue();
+        EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
+
     }
 
     /**
@@ -119,16 +112,8 @@ public class EmbedMessage {
      * @param proj    the proj
      * @throws CurseException the curse exception
      */
-    public static void sendUpdateNotification(TextChannel channel, CurseProject proj) throws CurseException {
-        if (Main.cfg.updateFileLink.equals("nolink")) {
-            EmbedMessage.messageWithoutLink(proj, proj.files().first(), channel);
-        }
-        if (Main.cfg.updateFileLink.equals("curse")) {
-            EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
-        }
-        if (Main.cfg.updateFileLink.equals("direct")) {
-            EmbedMessage.messageWithDirectLink(proj, proj.files().first(), channel);
-        }
+    public static void sendUpdateNotification(TextChannel channel, CurseProject proj) throws CurseException, InsufficientPermissionException {
+        EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
     }
 
     /**
@@ -138,7 +123,7 @@ public class EmbedMessage {
      * @return description
      */
     private static String getMessageDescription() {
-        String desc = Main.cfg.messageDescription;
+        String desc = "New File detected For CurseForge Project";
         if (desc.length() > 500) {
             System.out.println(
                     "Your messageDescription is over 500 characters, setting to default value **PLEASE CHANGE THIS**");
@@ -199,12 +184,8 @@ public class EmbedMessage {
      * @return discord code syntax
      */
     private static String getSyntax() {
-        String md = Main.cfg.changlogDiscordFormat;
-        if (!(md.equals("Syntax"))) {
-            return md + "\n";
-        } else {
-            return "\n";
-        }
+        return "\n";
+
     }
 
     /**

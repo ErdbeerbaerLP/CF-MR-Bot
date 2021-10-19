@@ -1,43 +1,49 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version "7.0.0"
 }
-version = '1.2.3'
+version = '2.0.0'
 group = "de.erdbeerbaerlp.curseforgeBot" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 mainClassName = 'de.erdbeerbaerlp.curseforgeBot.Main'
 repositories {
-    jcenter()
     maven {
         url "https://jitpack.io"
+    }
+    mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
     }
 }
 configurations {
     embed
-    compile.extendsFrom(embed)
+    compileOnly.extendsFrom(embed)
+}
+shadowJar {
+    classifier = ""
+    configurations = [project.configurations.embed]
+}
+artifacts {
+    archives tasks.shadowJar
 }
 dependencies {
-    embed('net.dv8tion:JDA:4.2.0_247'){
+    embed('net.dv8tion:JDA:4.3.0_324'){
         transitive = true
         exclude module: 'opus-java'
 
     }
-    embed("com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"){
+    embed("com.github.TheRandomLabs:CurseAPI:cdc5d48"){
         transitive = true
     }
     embed group: 'com.typesafe', name: 'config', version: '1.4.1'
     embed 'es.nitaur.markdown:txtmark:0.16'
     embed group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    embed(group: 'org.kohsuke', name: 'github-api', version: '1.128'){
-        exclude module: 'okhttp'
-    }
+    embed("de.ErdbeerbaerLP:toml4j:cf5b4655")
+    embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.23'
 }
 jar {
 
-    configurations.embed.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }
     manifest {
         attributes(
                 'Main-Class': mainClassName
