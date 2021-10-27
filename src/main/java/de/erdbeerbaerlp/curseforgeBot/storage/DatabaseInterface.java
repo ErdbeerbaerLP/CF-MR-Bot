@@ -12,40 +12,58 @@ import de.erdbeerbaerlp.curseforgeBot.storage.json.Root;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseInterface implements AutoCloseable {
-    private final Connection conn;
+    public final StatusThread status;
+    private Connection conn;
     public Gson gson = new GsonBuilder().create();
 
     public DatabaseInterface() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        conn = DriverManager.getConnection("jdbc:mysql://" + Config.instance().database.ip + ":" + Config.instance().database.port + "/" + Config.instance().database.dbName, Config.instance().database.username, Config.instance().database.password);
+        connect();
         if (conn == null) {
             throw new SQLException();
         }
-        runUpdate("create table if not exists cfcache\n" +
-                "(\n" +
-                "\tprojectid int not null,\n" +
-                "\tlatestFileID int default 0 not null\n" +
+        status = new StatusThread();
+        status.start();
+        if (conn == null) {
+            throw new SQLException();
+        }
+        runUpdate("CREATE TABLE IF NOT EXISTS `cfcache` (\n" +
+                "  `latestFileID` int NOT NULL DEFAULT '0',\n" +
+                "  `projectid` int NOT NULL,\n" +
+                "  PRIMARY KEY (`projectid`),\n" +
+                "  UNIQUE KEY `cfcache_projectid_uindex` (`projectid`)\n" +
                 ");");
-        runUpdate("create unique index cfcache_projectid_uindex\n" +
-                "\ton cfcache (projectid);");
-        runUpdate("alter table cfcache\n" +
-                "\tadd constraint cfcache_pk\n" +
-                "\t\tprimary key (projectid);");
-
-        runUpdate("create table if not exists channels\n" +
-                "(\n" +
-                "\tchannelid bigint not null,\n" +
-                "\tchanneldata json default ('') not null\n" +
+        runUpdate("CREATE TABLE IF NOT EXISTS `channels` (\n" +
+                "  `channeldata` json NOT NULL,\n" +
+                "  `channelid` bigint NOT NULL,\n" +
+                "  PRIMARY KEY (`channelid`),\n" +
+                "  UNIQUE KEY `channels_channelid_uindex` (`channelid`)\n" +
                 ");");
-        runUpdate("create unique index channels_channelid_uindex\n" +
-                "\ton channels (channelid);");
-        runUpdate("alter table channels\n" +
-                "\tadd constraint channels_pk\n" +
-                "\t\tprimary key (channelid);");
-
         runUpdate("alter table channels modify column channeldata json default ('" + gson.toJson(new Root()) + "') not null;");
+    }
+
+    private void connect() throws SQLException {
+        conn = DriverManager.getConnection("jdbc:mysql://" + Config.instance().database.ip + ":" + Config.instance().database.port + "/" + Config.instance().database.dbName, Config.instance().database.username, Config.instance().database.password);
+    }
+
+    private boolean isConnected() {
+        try {
+            return conn.isValid(10);
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public CurseforgeProject.CFChannel deleteChannelFromProject(int projectID, long channel) {
+        final CurseforgeProject.CFChannel chan = getOrCreateCFChannel(channel);
+        final ArrayList<Integer> projs = new ArrayList<>(List.of(chan.data.projects));
+        projs.remove((Object) projectID);
+        chan.data.projects = projs.toArray(new Integer[0]);
+        runUpdate("REPLACE INTO channels (channelid,channeldata) values (" + channel + ",'" + gson.toJson(chan.data) + "')");
+        return getOrCreateCFChannel(channel);
     }
 
     public void addChannel(CurseforgeProject.CFChannel channel) {
@@ -77,13 +95,35 @@ public class DatabaseInterface implements AutoCloseable {
         return getOrCreateCFChannel(channel);
     }
 
-    public CurseforgeProject.CFChannel deleteChannelFromProject(int projectID, long channel) {
-        final CurseforgeProject.CFChannel chan = getOrCreateCFChannel(channel);
-        final ArrayList<Integer> projs = new ArrayList<>(List.of(chan.data.projects));
-        projs.remove(projectID);
-        chan.data.projects = projs.toArray(new Integer[0]);
-        runUpdate("REPLACE INTO channels (channelid,channeldata) values (" + channel + ",'" + gson.toJson(chan.data) + "')");
-        return getOrCreateCFChannel(channel);
+    public class StatusThread extends Thread {
+        private boolean alive = true;
+
+        public boolean isDBAlive() {
+            return alive;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                alive = DatabaseInterface.this.isConnected();
+                if (!alive) try {
+                    System.err.println("Attempting Database reconnect...");
+                    DatabaseInterface.this.connect();
+                } catch (SQLException e) {
+                    System.err.println("Failed to reconnect to database: " + e.getMessage());
+                    try {
+                        TimeUnit.SECONDS.sleep(15);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        }
     }
 
     public CurseforgeProject.CFChannel getOrCreateCFChannel(long channelID) {

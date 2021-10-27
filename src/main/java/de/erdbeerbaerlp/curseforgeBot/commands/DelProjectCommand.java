@@ -24,8 +24,9 @@ public class DelProjectCommand extends CommandData implements CFCommand {
         else {
             final int projectID = Integer.parseInt(id.getAsString());
             if (Main.projects.containsKey(projectID)) {
+                final String name = Main.projects.get(projectID).proj.name();
                 Main.projects.get(projectID).removeChannel(Main.ifa.deleteChannelFromProject(projectID, ev.getChannel().getIdLong()));
-                ev.reply("Removed Project \"" + Main.projects.get(projectID).proj.name() + "\" from this channel!").queue();
+                ev.reply("Removed Project \"" + name + "\" from this channel!").queue();
             } else {
                 ev.reply("This project does not seem to be attached to this channel :thinking:").queue();
             }
