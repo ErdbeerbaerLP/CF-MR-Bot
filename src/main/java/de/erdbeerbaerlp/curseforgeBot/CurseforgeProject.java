@@ -41,15 +41,21 @@ public class CurseforgeProject implements Runnable {
         return this.channels.remove(channel);
     }
 
+    final ArrayList<CFChannel> toRemove = new ArrayList<CFChannel>();
     @Override
     public void run() {
         try {
             proj.refreshFiles();
             if (proj.files().isEmpty()) return;
             if (Main.ifa.isNewFile(proj)) {
+                toRemove.forEach(this::removeChannel);
+                toRemove.clear();
                 for (CFChannel c : channels) {
                     final TextChannel channel = Main.jda.getTextChannelById(c.channelID);
-                    //noinspection ConstantConditions
+                    if (channel == null) {
+                        toRemove.add(Main.ifa.deleteChannelFromProject(proj.id(), c.channelID));
+                        return;
+                    }
                     final Role role = c.data.settings.pingRole == 0 ? null : channel.getGuild().getRoleById(c.data.settings.pingRole);
                     try {
                         if (role != null) {
