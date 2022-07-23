@@ -41,7 +41,7 @@ dependencies {
     embed("de.erdbeerbaerlp:cfcore:1.0.0-SNAPSHOT"){
         changing = true
     }
-    embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.23'
+    embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.29'
 
 }
 configurations.all {
