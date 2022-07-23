@@ -3,8 +3,7 @@ package de.erdbeerbaerlp.curseforgeBot.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.project.CurseProject;
+import de.erdbeerbaerlp.cfcore.json.CFMod;
 import de.erdbeerbaerlp.curseforgeBot.CurseforgeProject;
 import de.erdbeerbaerlp.curseforgeBot.Main;
 import de.erdbeerbaerlp.curseforgeBot.storage.json.Root;
@@ -31,8 +30,8 @@ public class DatabaseInterface implements AutoCloseable {
             throw new SQLException();
         }
         runUpdate("CREATE TABLE IF NOT EXISTS `cfcache` (\n" +
-                "  `latestFileID` int NOT NULL DEFAULT '0',\n" +
-                "  `projectid` int NOT NULL,\n" +
+                "  `latestFileID` bigint NOT NULL DEFAULT '0',\n" +
+                "  `projectid` bigint NOT NULL,\n" +
                 "  PRIMARY KEY (`projectid`),\n" +
                 "  UNIQUE KEY `cfcache_projectid_uindex` (`projectid`)\n" +
                 ");");
@@ -57,7 +56,7 @@ public class DatabaseInterface implements AutoCloseable {
         }
     }
 
-    public CurseforgeProject.CFChannel deleteChannelFromProject(int projectID, long channel) {
+    public CurseforgeProject.CFChannel deleteChannelFromProject(long projectID, long channel) {
         final CurseforgeProject.CFChannel chan = getOrCreateCFChannel(channel);
         final ArrayList<Integer> projs = new ArrayList<>(List.of(chan.data.projects));
         projs.remove((Object) projectID);
@@ -74,7 +73,7 @@ public class DatabaseInterface implements AutoCloseable {
         runUpdate("DELETE FROM channels WHERE channelid = " + serverID);
     }
 
-    public int getLatestFile(int projectid) throws SQLException {
+    public int getLatestFile(long projectid) throws SQLException {
         final ResultSet query = query("SELECT latestFileID FROM cfcache WHERE projectid = " + projectid + ";");
         if (query.next()) {
             return query.getInt(1);
@@ -82,7 +81,7 @@ public class DatabaseInterface implements AutoCloseable {
         return -1;
     }
 
-    public void updateCache(int projectid, long fileid) {
+    public void updateCache(long projectid, long fileid) {
         runUpdate("REPLACE INTO cfcache (projectid,latestFileID) VALUES(" + projectid + "," + fileid + ")");
     }
 
@@ -175,7 +174,7 @@ public class DatabaseInterface implements AutoCloseable {
         conn.close();
     }
 
-    public boolean isNewFile(CurseProject proj) throws CurseException, SQLException {
-        return Main.ifa.getLatestFile(proj.id()) < proj.files().first().id();
+    public boolean isNewFile(CFMod proj) throws SQLException {
+        return Main.ifa.getLatestFile(proj.id) < proj.latestFilesIndexes[0].fileId;
     }
 }

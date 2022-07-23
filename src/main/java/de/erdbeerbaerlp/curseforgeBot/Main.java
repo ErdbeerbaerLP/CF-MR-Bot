@@ -1,28 +1,27 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
 
-import com.therandomlabs.curseapi.CurseAPI;
-import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.project.CurseProject;
+import de.erdbeerbaerlp.cfcore.CFCoreAPI;
+import de.erdbeerbaerlp.cfcore.json.CFMod;
 import de.erdbeerbaerlp.curseforgeBot.commands.*;
 import de.erdbeerbaerlp.curseforgeBot.storage.Config;
 import de.erdbeerbaerlp.curseforgeBot.storage.DatabaseInterface;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
@@ -33,12 +32,14 @@ public class Main {
     private static final HashMap<Long, CFCommand> registeredCMDs = new HashMap<>();
     public static DatabaseInterface ifa;
 
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException, InterruptedException, LoginException {
         Config.instance().loadConfig();
+        CFCoreAPI.setApiKey(Config.instance().general.apiKey);
         ifa = new DatabaseInterface();
         jda = JDABuilder.createLight(Config.instance().general.botToken).setActivity(Activity.playing("in Beta")).addEventListeners((EventListener) event -> {
-            if (event instanceof SlashCommandEvent) {
-                final SlashCommandEvent ev = (SlashCommandEvent) event;
+            if (event instanceof SlashCommandInteractionEvent) {
+                final SlashCommandInteractionEvent ev = (SlashCommandInteractionEvent) event;
                 if (registeredCMDs.containsKey(ev.getCommandIdLong())) {
                     final CFCommand cfCommand = registeredCMDs.get(ev.getCommandIdLong());
                     System.out.println("Running command " + ((CommandData) cfCommand).getName());
@@ -55,23 +56,19 @@ public class Main {
                 System.out.println(projID + " Pid");
                 if (projects.containsKey(projID)) {
                     projects.get(projID).addChannel(c);
-                } else
-                    try {
-                        final Optional<CurseProject> project = CurseAPI.project(projID);
-                        if (project.isPresent())
-                            projects.put(projID, new CurseforgeProject(project.get(), c));
-                    } catch (CurseException e) {
-                        e.printStackTrace();
-                    }
+                } else {
+
+                    final CFMod project = CFCoreAPI.getModFromID(projID);
+                    projects.put(projID, new CurseforgeProject(project, c));
+                }
             }
         }
 
         //Add commands
         registerCommands();
-
         while (true) {
             for (CurseforgeProject proj : projects.values()) {
-                System.out.println(proj.proj.name());
+                System.out.println(proj.proj.name);
                 proj.run();
             }
             TimeUnit.MINUTES.sleep(10);
@@ -85,7 +82,7 @@ public class Main {
         if (commandList.length == cmds.size())
             for (CFCommand cmd : commandList) {
                 for (Command c : cmds) {
-                    final CommandData command = (CommandData) cmd;
+                    final CommandDataImpl command = (CommandDataImpl) cmd;
                     if (command.getName().equals(c.getName())) {
                         if (!optionsEqual(command.getOptions(), c.getOptions())) {
                             regenCommands = true;

@@ -1,7 +1,7 @@
 package de.erdbeerbaerlp.curseforgeBot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public interface CFCommand {
-    void execute(SlashCommandEvent ev);
+    void execute(SlashCommandInteractionEvent ev);
 }

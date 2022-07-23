@@ -1,16 +1,18 @@
 package de.erdbeerbaerlp.curseforgeBot;
 
 import com.github.rjeschke.txtmark.Processor;
-import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.file.CurseFile;
-import com.therandomlabs.curseapi.project.CurseProject;
+import de.erdbeerbaerlp.cfcore.CFCoreAPI;
+import de.erdbeerbaerlp.cfcore.json.CFFile;
+import de.erdbeerbaerlp.cfcore.json.CFFileIndex;
+import de.erdbeerbaerlp.cfcore.json.CFMod;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import org.apache.commons.collections4.IteratorUtils;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
 
 
 public class EmbedMessage {
@@ -21,22 +23,19 @@ public class EmbedMessage {
      * @param proj    the proj
      * @param file    the file
      * @param channel the channel
-     * @throws CurseException the curse exception
      */
-    public static void messageWithoutLink(CurseProject proj, CurseFile file, TextChannel channel)
-            throws CurseException {
+    public static void messageWithoutLink(CFMod proj, CFFileIndex file, TextChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(proj.name(), proj.url().toString());
-        embed.setThumbnail(proj.logo().thumbnailURL().toString());
+        embed.setTitle(proj.name, proj.links.websiteUrl);
+        embed.setThumbnail(proj.logo.thumbnailUrl);
         embed.setDescription(getMessageDescription());
+        final CFFile f = CFCoreAPI.getFileFromID(proj.id, file.fileId);
         embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Release Type**: `" + file.releaseType().name() + "`" + "\n **File Name**: `" + file.displayName()
-                        + "`" + "\n **Category**: `" + proj.categorySection().name() + "`" + "\n **GameVersion**: `"
-                        + getGameVersions(proj) + "`", false);
-        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(file.changelogPlainText(1000)) + "\n```",
+                "**Release Type**: `" + f.releaseType.name() + "`" + "\n **File Name**: `" + f.displayName
+                        + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
+                        + getGameVersions(f),
                 false);
-        channel.sendMessage(embed.build()).queue();
+        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
     }
 
     /**
@@ -45,23 +44,19 @@ public class EmbedMessage {
      * @param proj    the proj
      * @param file    the file
      * @param channel the channel
-     * @throws CurseException the curse exception
      */
-    public static void messageWithCurseLink(CurseProject proj, CurseFile file, TextChannel channel)
-            throws CurseException {
+    public static void messageWithCurseLink(CFMod proj, CFFileIndex file, TextChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(proj.name(), proj.url().toString());
-        embed.setThumbnail(proj.logo().thumbnailURL().toString());
+        embed.setTitle(proj.name, proj.links.websiteUrl);
+        embed.setThumbnail(proj.logo.thumbnailUrl);
         embed.setDescription(getMessageDescription());
+        final CFFile f = CFCoreAPI.getFileFromID(proj.id, file.fileId);
         embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Release Type**: `" + file.releaseType().name() + "`" + "\n **File Name**: `" + file.displayName()
-                        + "`" + "\n **Category**: `" + proj.categorySection().name() + "`" + "\n **GameVersion**: `"
-                        + getGameVersions(proj) + "`" + "\n **Website Link**: " + "[CurseForge](" + getUrl(proj) + ")",
+                "**Release Type**: `" + f.releaseType.name() + "`" + "\n **File Name**: `" + f.displayName
+                        + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
+                        + getGameVersions(f) + "`" + "\n **Website Link**: " + "[CurseForge](" + getUrl(proj) + ")",
                 false);
-        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(file.changelogPlainText(1000)) + "\n```",
-                false);
-        channel.sendMessage(embed.build()).queue();
+        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
     }
 
     /**
@@ -70,23 +65,19 @@ public class EmbedMessage {
      * @param proj    the proj
      * @param file    the file
      * @param channel the channel
-     * @throws CurseException the curse exception
      */
-    public static void messageWithDirectLink(CurseProject proj, CurseFile file, TextChannel channel)
-            throws CurseException {
+    public static void messageWithDirectLink(CFMod proj, CFFileIndex file, TextChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(proj.name(), proj.url().toString());
-        embed.setThumbnail(proj.logo().thumbnailURL().toString());
+        embed.setTitle(proj.name, proj.links.websiteUrl);
+        embed.setThumbnail(proj.logo.thumbnailUrl);
         embed.setDescription(getMessageDescription());
+        final CFFile f = CFCoreAPI.getFileFromID(proj.id, file.fileId);
         embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Release Type**: `" + file.releaseType().name() + "`" + "\n **File Name**: `" + file.displayName()
-                        + "`" + "\n **Category**: `" + proj.categorySection().name() + "`" + "\n **GameVersion**: `"
-                        + getGameVersions(proj) + "`" + "\n **Download Link**: " + "[Download](" + file.downloadURL()
+                "**Release Type**: `" + file.releaseType.name() + "`" + "\n **File Name**: `" + f.displayName
+                        + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
+                        + getGameVersions(f) + "`" + "\n **Download Link**: " + "[Download](" + f.downloadUrl
                         + ")", false);
-        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
-                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(file.changelogPlainText(1000)) + "\n```",
-                false);
-        channel.sendMessage(embed.build()).queue();
+        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
     }
 
     /**
@@ -95,13 +86,12 @@ public class EmbedMessage {
      * @param role    the role
      * @param channel the channel
      * @param proj    the proj
-     * @throws CurseException the curse exception
      */
-    public static void sendPingableUpdateNotification(Role role, TextChannel channel, CurseProject proj)
-            throws CurseException, InsufficientPermissionException {
+    public static void sendPingableUpdateNotification(Role role, TextChannel channel, CFMod proj)
+            throws InsufficientPermissionException {
 
         channel.sendMessage(role.getAsMention()).queue();
-        EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
+        EmbedMessage.messageWithCurseLink(proj, proj.latestFilesIndexes[0], channel);
 
     }
 
@@ -110,10 +100,9 @@ public class EmbedMessage {
      *
      * @param channel the channel
      * @param proj    the proj
-     * @throws CurseException the curse exception
      */
-    public static void sendUpdateNotification(TextChannel channel, CurseProject proj) throws CurseException, InsufficientPermissionException {
-        EmbedMessage.messageWithCurseLink(proj, proj.files().first(), channel);
+    public static void sendUpdateNotification(TextChannel channel, CFMod proj) throws InsufficientPermissionException {
+        EmbedMessage.messageWithCurseLink(proj, proj.latestFilesIndexes[0], channel);
     }
 
     /**
@@ -157,17 +146,15 @@ public class EmbedMessage {
     /**
      * Gets the game versions.
      *
-     * @param proj the proj
+     * @param f File to get versions from
      * @return the game versions
-     * @throws CurseException the curse exception
      */
     @SuppressWarnings("StringConcatenationInLoop")
-    private static String getGameVersions(final CurseProject proj) throws CurseException {
-        if (proj.files().first().gameVersionStrings().isEmpty())
+    private static String getGameVersions(final CFFile f) {
+        if (f.gameVersions.length == 0)
             return "UNKNOWN";
         String out = "";
-        final Stream<String> stream = proj.files().first().gameVersionStrings().stream().sorted();
-        for (Iterator<String> it = stream.iterator(); it.hasNext(); ) {
+        for (Iterator<String> it = IteratorUtils.arrayIterator(f.gameVersions); it.hasNext(); ) {
             final String s = it.next();
             out = out + s + (it.hasNext() ? ", " : "");
         }
@@ -193,11 +180,10 @@ public class EmbedMessage {
      *
      * @param proj the proj
      * @return url link to file page
-     * @throws CurseException the curse exception
      */
-    private static String getUrl(final CurseProject proj) throws CurseException {
-        String urlPre = proj.url().toString();
-        int id = proj.files().first().id();
+    private static String getUrl(final CFMod proj) {
+        String urlPre = proj.links.websiteUrl;
+        long id = proj.latestFilesIndexes[0].fileId;
         return urlPre + "/files/" + id;
     }
 }

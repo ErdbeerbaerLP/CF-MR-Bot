@@ -71,6 +71,8 @@ public class Config {
     public static class General {
         @TomlComment({"Insert your discord bot token here", "or use \"args\" here and the argument \"- token TOKEN\" after the jar"})
         public String botToken = "InsertHere";
+        @TomlComment("Insert your CFCore API Key here")
+        public String apiKey = "InsertHere";
     }
 
 }
