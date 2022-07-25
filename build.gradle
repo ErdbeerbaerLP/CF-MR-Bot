@@ -38,7 +38,7 @@ dependencies {
     embed 'es.nitaur.markdown:txtmark:0.16'
     embed group: 'commons-cli', name: 'commons-cli', version: '1.4'
     embed("de.ErdbeerbaerLP:toml4j:cf5b4655")
-    embed("de.erdbeerbaerlp:cfcore:1.0.0-SNAPSHOT"){
+    embed("de.erdbeerbaerlp:cfcore:1.0.0"){
         changing = true
     }
     embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.23'
