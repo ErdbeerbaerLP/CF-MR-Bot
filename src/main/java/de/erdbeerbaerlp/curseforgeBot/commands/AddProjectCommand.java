@@ -26,7 +26,7 @@ public class AddProjectCommand extends CommandDataImpl implements CFCommand {
         final OptionMapping id = ev.getOption("project-id");
         if (id == null) ev.reply("Project ID == null ?!?").queue();
         else {
-            final int projectID = Integer.parseInt(id.getAsString());
+            final long projectID = Long.parseLong(id.getAsString());
             if (Main.projects.containsKey(projectID)) {
                 Main.projects.get(projectID).addChannel(Main.ifa.addChannelToProject(projectID, ev.getChannel().getIdLong()));
                 ev.reply("Attached Project \"" + Main.projects.get(projectID).proj.name + "\" to this channel!" + (Main.projects.get(projectID).proj.latestFilesIndexes.length == 0 ? "\n*This project does not have any files yet. If there are files already, this project's game or category is not (yet) supported*" : "")).queue();

@@ -16,12 +16,12 @@ public class CurseforgeProject implements Runnable {
     private final ArrayList<CFChannel> channels = new ArrayList<>();
     public CFMod proj;
 
-    public void addChannel(long idLong, int projectID) {
+    public void addChannel(long idLong, long projectID) {
         for (CFChannel c : channels)
             if (c != null && c.channelID == idLong) return;
 
         final CFChannel cfChannel = new CFChannel(idLong, new Root());
-        cfChannel.data.projects = new Integer[]{projectID};
+        cfChannel.data.projects = new Long[]{projectID};
         this.channels.add(cfChannel);
         Main.ifa.addChannelToProject(projectID, idLong);
     }
@@ -29,6 +29,13 @@ public class CurseforgeProject implements Runnable {
     public boolean addChannel(CFChannel channel) {
         System.out.println("Adding " + channel.channelID);
         return this.channels.add(channel);
+    }
+
+    public boolean removeChannel(long channelID) {
+        for (CFChannel c : channels) {
+            if (c.channelID == channelID) return removeChannel(c);
+        }
+        return false;
     }
 
     public boolean removeChannel(CFChannel channel) {
@@ -49,7 +56,8 @@ public class CurseforgeProject implements Runnable {
             if (Main.ifa.isNewFile(proj)) {
                 toRemove.forEach(this::removeChannel);
                 toRemove.clear();
-                for (CFChannel c : channels) {
+                Main.ifa.updateCache(proj.id, proj.latestFilesIndexes[0].fileId);
+                for (final CFChannel c : channels) {
                     final TextChannel channel = Main.jda.getTextChannelById(c.channelID);
                     if (channel == null) {
                         toRemove.add(Main.ifa.deleteChannelFromProject(proj.id, c.channelID));
@@ -75,7 +83,6 @@ public class CurseforgeProject implements Runnable {
 
                     }
                 }
-                Main.ifa.updateCache(proj.id, proj.latestFilesIndexes[0].fileId);
             }
         } catch (SQLException e) {
             e.printStackTrace();

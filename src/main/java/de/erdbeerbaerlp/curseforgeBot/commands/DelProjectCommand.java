@@ -22,11 +22,12 @@ public class DelProjectCommand extends CommandDataImpl implements CFCommand {
         final OptionMapping id = ev.getOption("project-id");
         if (id == null) ev.reply("Project ID == null ?!?").queue();
         else {
-            final int projectID = Integer.parseInt(id.getAsString());
+            final long projectID = Long.parseLong(id.getAsString());
             if (Main.projects.containsKey(projectID)) {
                 final String name = Main.projects.get(projectID).proj.name;
-                Main.projects.get(projectID).removeChannel(Main.ifa.deleteChannelFromProject(projectID, ev.getChannel().getIdLong()));
-                ev.reply("Removed Project \"" + name + "\" from this channel!").queue();
+                Main.ifa.deleteChannelFromProject(projectID, ev.getChannel().getIdLong());
+                final boolean fullyRemoved = Main.projects.get(projectID).removeChannel(ev.getChannel().getIdLong());
+                ev.reply("Removed Project \"" + name + "\" from this channel!" + (fullyRemoved ? "" : "\nFailed to remove channel from memory")).queue();
             } else {
                 ev.reply("This project does not seem to be attached to this channel :thinking:").queue();
             }

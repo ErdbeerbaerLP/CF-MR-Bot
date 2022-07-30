@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     static JDA jda;
 
-    public static final HashMap<Integer, CurseforgeProject> projects = new HashMap<>();
+    public static final HashMap<Long, CurseforgeProject> projects = new HashMap<>();
     private static final CFCommand[] commandList = new CFCommand[]{new AddProjectCommand(), new DelProjectCommand(), new FetchLatestFileCommand(), new SupportCommand()};
     private static final HashMap<Long, CFCommand> registeredCMDs = new HashMap<>();
     public static DatabaseInterface ifa;
@@ -52,15 +52,15 @@ public class Main {
         final ArrayList<CurseforgeProject.CFChannel> allChannels = ifa.getAllChannels();
         for (CurseforgeProject.CFChannel c : allChannels) {
             System.out.println(c.channelID + " Cid");
-            for (Integer projID : c.data.projects) {
+            for (Long projID : c.data.projects) {
                 System.out.println(projID + " Pid");
                 if (projects.containsKey(projID)) {
                     projects.get(projID).addChannel(c);
                 } else {
-
                     final CFMod project = CFCoreAPI.getModFromID(projID);
                     projects.put(projID, new CurseforgeProject(project, c));
                 }
+                Thread.sleep(100); //Not totally spam the api, causing slowdown of the startup process
             }
         }
 
@@ -70,6 +70,7 @@ public class Main {
             for (CurseforgeProject proj : projects.values()) {
                 System.out.println(proj.proj.name);
                 proj.run();
+                Thread.sleep(100);
             }
             TimeUnit.MINUTES.sleep(10);
 

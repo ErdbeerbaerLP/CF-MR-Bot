@@ -58,9 +58,9 @@ public class DatabaseInterface implements AutoCloseable {
 
     public CurseforgeProject.CFChannel deleteChannelFromProject(long projectID, long channel) {
         final CurseforgeProject.CFChannel chan = getOrCreateCFChannel(channel);
-        final ArrayList<Integer> projs = new ArrayList<>(List.of(chan.data.projects));
-        projs.remove((Object) projectID);
-        chan.data.projects = projs.toArray(new Integer[0]);
+        final ArrayList<Long> projs = new ArrayList<>(List.of(chan.data.projects));
+        projs.remove(projectID);
+        chan.data.projects = projs.toArray(new Long[0]);
         runUpdate("REPLACE INTO channels (channelid,channeldata) values (" + channel + ",'" + gson.toJson(chan.data) + "')");
         return getOrCreateCFChannel(channel);
     }
@@ -85,11 +85,11 @@ public class DatabaseInterface implements AutoCloseable {
         runUpdate("REPLACE INTO cfcache (projectid,latestFileID) VALUES(" + projectid + "," + fileid + ")");
     }
 
-    public CurseforgeProject.CFChannel addChannelToProject(int projectID, long channel) {
+    public CurseforgeProject.CFChannel addChannelToProject(long projectID, long channel) {
         final CurseforgeProject.CFChannel chan = getOrCreateCFChannel(channel);
-        final ArrayList<Integer> projs = new ArrayList<>(List.of(chan.data.projects));
+        final ArrayList<Long> projs = new ArrayList<>(List.of(chan.data.projects));
         projs.add(projectID);
-        chan.data.projects = projs.toArray(new Integer[0]);
+        chan.data.projects = projs.toArray(new Long[0]);
         runUpdate("REPLACE INTO channels (channelid,channeldata) values (" + channel + ",'" + gson.toJson(chan.data) + "')");
         return getOrCreateCFChannel(channel);
     }
