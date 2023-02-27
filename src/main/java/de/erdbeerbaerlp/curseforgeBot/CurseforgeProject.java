@@ -5,7 +5,7 @@ import de.erdbeerbaerlp.cfcore.json.CFMod;
 import de.erdbeerbaerlp.curseforgeBot.storage.json.Root;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 
 import java.sql.SQLException;
@@ -58,7 +58,7 @@ public class CurseforgeProject implements Runnable {
                 toRemove.clear();
                 Main.ifa.updateCache(proj.id, proj.latestFilesIndexes[0].fileId);
                 for (final CFChannel c : channels) {
-                    final TextChannel channel = Main.jda.getTextChannelById(c.channelID);
+                    final StandardGuildMessageChannel channel = (StandardGuildMessageChannel) Main.jda.getGuildChannelById(c.channelID);
                     if (channel == null) {
                         toRemove.add(Main.ifa.deleteChannelFromProject(proj.id, c.channelID));
                         return;

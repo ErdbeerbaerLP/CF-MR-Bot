@@ -38,8 +38,7 @@ public class Main {
         CFCoreAPI.setApiKey(Config.instance().general.apiKey);
         ifa = new DatabaseInterface();
         jda = JDABuilder.createLight(Config.instance().general.botToken).setActivity(Activity.playing("in Beta")).addEventListeners((EventListener) event -> {
-            if (event instanceof SlashCommandInteractionEvent) {
-                final SlashCommandInteractionEvent ev = (SlashCommandInteractionEvent) event;
+            if (event instanceof final SlashCommandInteractionEvent ev) {
                 if (registeredCMDs.containsKey(ev.getCommandIdLong())) {
                     final CFCommand cfCommand = registeredCMDs.get(ev.getCommandIdLong());
                     System.out.println("Running command " + ((CommandData) cfCommand).getName());
@@ -50,9 +49,9 @@ public class Main {
 
         //Load everything from database
         final ArrayList<CurseforgeProject.CFChannel> allChannels = ifa.getAllChannels();
-        for (CurseforgeProject.CFChannel c : allChannels) {
+        for (final CurseforgeProject.CFChannel c : allChannels) {
             System.out.println(c.channelID + " Cid");
-            for (Long projID : c.data.projects) {
+            for (final Long projID : c.data.projects) {
                 System.out.println(projID + " Pid");
                 if (projects.containsKey(projID)) {
                     projects.get(projID).addChannel(c);
@@ -67,7 +66,7 @@ public class Main {
         //Add commands
         registerCommands();
         while (true) {
-            for (CurseforgeProject proj : projects.values()) {
+            for (final CurseforgeProject proj : projects.values()) {
                 System.out.println(proj.proj.name);
                 proj.run();
                 Thread.sleep(100);
@@ -81,8 +80,8 @@ public class Main {
         final List<Command> cmds = jda.retrieveCommands().complete();
         boolean regenCommands = false;
         if (commandList.length == cmds.size())
-            for (CFCommand cmd : commandList) {
-                for (Command c : cmds) {
+            for (final CFCommand cmd : commandList) {
+                for (final Command c : cmds) {
                     final CommandDataImpl command = (CommandDataImpl) cmd;
                     if (command.getName().equals(c.getName())) {
                         if (!optionsEqual(command.getOptions(), c.getOptions())) {
@@ -95,7 +94,7 @@ public class Main {
         if (regenCommands) {
             System.out.println("Regenerating commands...");
             CommandListUpdateAction commandListUpdateAction = jda.updateCommands();
-            for (CFCommand cmd : commandList) {
+            for (final CFCommand cmd : commandList) {
                 commandListUpdateAction = commandListUpdateAction.addCommands((CommandData) cmd);
             }
             commandListUpdateAction.submit().thenAccept(Main::addCmds);
@@ -107,8 +106,8 @@ public class Main {
     }
 
     private static void addCmds(List<Command> cmds) {
-        for (Command cmd : cmds) {
-            for (CFCommand cfcmd : commandList) {
+        for (final Command cmd : cmds) {
+            for (final CFCommand cfcmd : commandList) {
                 if (cmd.getName().equals(((CommandData) cfcmd).getName())) {
                     registeredCMDs.put(cmd.getIdLong(), cfcmd);
                     System.out.println("Added command " + cmd.getName() + " with ID " + cmd.getIdLong());

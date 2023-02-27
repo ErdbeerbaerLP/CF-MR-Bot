@@ -6,10 +6,11 @@ import de.erdbeerbaerlp.cfcore.json.CFFile;
 import de.erdbeerbaerlp.cfcore.json.CFFileIndex;
 import de.erdbeerbaerlp.cfcore.json.CFMod;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.apache.commons.collections4.IteratorUtils;
 
 import java.util.Iterator;
@@ -24,7 +25,7 @@ public class EmbedMessage {
      * @param file    the file
      * @param channel the channel
      */
-    public static void messageWithoutLink(CFMod proj, CFFileIndex file, TextChannel channel) {
+    public static void messageWithoutLink(CFMod proj, CFFileIndex file, StandardGuildMessageChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(proj.name, proj.links.websiteUrl);
         embed.setThumbnail(proj.logo.thumbnailUrl);
@@ -35,7 +36,14 @@ public class EmbedMessage {
                         + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
                         + getGameVersions(f),
                 false);
-        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
+        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
+                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(CFCoreAPI.getChangelog(proj.id, file.fileId)) + "\n```",
+                false);
+        channel.sendMessage(new MessageCreateBuilder().addEmbeds(embed.build()).build()).submit().thenAccept((a) -> {
+            if (channel instanceof NewsChannel) {
+                a.crosspost().queue();
+            }
+        });
     }
 
     /**
@@ -45,7 +53,7 @@ public class EmbedMessage {
      * @param file    the file
      * @param channel the channel
      */
-    public static void messageWithCurseLink(CFMod proj, CFFileIndex file, TextChannel channel) {
+    public static void messageWithCurseLink(CFMod proj, CFFileIndex file, StandardGuildMessageChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(proj.name, proj.links.websiteUrl);
         embed.setThumbnail(proj.logo.thumbnailUrl);
@@ -56,7 +64,14 @@ public class EmbedMessage {
                         + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
                         + getGameVersions(f) + "`" + "\n **Website Link**: " + "[CurseForge](" + getUrl(proj) + ")",
                 false);
-        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
+        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
+                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(CFCoreAPI.getChangelog(proj.id, file.fileId)) + "\n```",
+                false);
+        channel.sendMessage(new MessageCreateBuilder().addEmbeds(embed.build()).build()).submit().thenAccept((a) -> {
+            if (channel instanceof NewsChannel) {
+                a.crosspost().queue();
+            }
+        });
     }
 
     /**
@@ -66,7 +81,7 @@ public class EmbedMessage {
      * @param file    the file
      * @param channel the channel
      */
-    public static void messageWithDirectLink(CFMod proj, CFFileIndex file, TextChannel channel) {
+    public static void messageWithDirectLink(CFMod proj, CFFileIndex file, StandardGuildMessageChannel channel) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(proj.name, proj.links.websiteUrl);
         embed.setThumbnail(proj.logo.thumbnailUrl);
@@ -77,7 +92,14 @@ public class EmbedMessage {
                         + "`" + "\n **Category**: `" + proj.categories[proj.categories.length - 1].name + "`" + "\n **GameVersion**: `"
                         + getGameVersions(f) + "`" + "\n **Download Link**: " + "[Download](" + f.downloadUrl
                         + ")", false);
-        channel.sendMessage(new MessageBuilder(embed.build()).build()).queue();
+        embed.addField(EmbedBuilder.ZERO_WIDTH_SPACE,
+                "**Changelog:** \n```" + getSyntax() + "\n" + formatChangelog(CFCoreAPI.getChangelog(proj.id, file.fileId)) + "\n```",
+                false);
+        channel.sendMessage(new MessageCreateBuilder().addEmbeds(embed.build()).build()).submit().thenAccept((a) -> {
+            if (channel instanceof NewsChannel) {
+                a.crosspost().queue();
+            }
+        });
     }
 
     /**
@@ -87,7 +109,7 @@ public class EmbedMessage {
      * @param channel the channel
      * @param proj    the proj
      */
-    public static void sendPingableUpdateNotification(Role role, TextChannel channel, CFMod proj)
+    public static void sendPingableUpdateNotification(Role role, StandardGuildMessageChannel channel, CFMod proj)
             throws InsufficientPermissionException {
 
         channel.sendMessage(role.getAsMention()).queue();
@@ -101,7 +123,7 @@ public class EmbedMessage {
      * @param channel the channel
      * @param proj    the proj
      */
-    public static void sendUpdateNotification(TextChannel channel, CFMod proj) throws InsufficientPermissionException {
+    public static void sendUpdateNotification(StandardGuildMessageChannel channel, CFMod proj) throws InsufficientPermissionException {
         EmbedMessage.messageWithCurseLink(proj, proj.latestFilesIndexes[0], channel);
     }
 
