@@ -34,7 +34,7 @@ dependencies {
         exclude module: 'opus-java'
 
     }
-    embed group: 'com.typesafe', name: 'config', version: '1.4.1'
+    embed group: 'com.typesafe', name: 'config', version: '1.4.2'
     embed 'es.nitaur.markdown:txtmark:0.16'
     embed group: 'commons-cli', name: 'commons-cli', version: '1.4'
     embed("de.ErdbeerbaerLP:toml4j:cf5b4655")
