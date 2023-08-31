@@ -3,7 +3,7 @@ package de.erdbeerbaerlp.curseforgeBot.commands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
-public class SupportCommand extends CommandDataImpl implements CFCommand {
+public class SupportCommand extends CommandDataImpl implements DCCommand {
     public SupportCommand() {
         super("support", "Need help? Join my discord server");
     }

@@ -3,7 +3,7 @@ plugins {
     id 'application'
     id 'com.github.johnrengelman.shadow' version "7.0.0"
 }
-version = '2.0.0'
+version = '2.0.1'
 group = "de.erdbeerbaerlp.curseforgeBot" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 mainClassName = 'de.erdbeerbaerlp.curseforgeBot.Main'
 repositories {
@@ -29,10 +29,9 @@ artifacts {
     archives tasks.shadowJar
 }
 dependencies {
-    embed('net.dv8tion:JDA:5.0.0-beta.4') {
+    embed('net.dv8tion:JDA:5.0.0-beta.13') {
         transitive = true
         exclude module: 'opus-java'
-
     }
     embed group: 'com.typesafe', name: 'config', version: '1.4.1'
     embed 'es.nitaur.markdown:txtmark:0.16'
@@ -41,7 +40,8 @@ dependencies {
     embed("de.erdbeerbaerlp:cfcore:1.0.1") {
         changing = true
     }
-    embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.23'
+    embed 'dev.masecla:Modrinth4J:2.0.0'
+    embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.33'
 
 }
 configurations.all {

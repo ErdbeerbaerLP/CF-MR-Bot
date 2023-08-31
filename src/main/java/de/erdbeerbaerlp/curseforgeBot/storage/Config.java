@@ -73,6 +73,8 @@ public class Config {
         public String botToken = "InsertHere";
         @TomlComment("Insert your CFCore API Key here")
         public String apiKey = "InsertHere";
+        @TomlComment({"Insert your Modrinth API Key here", "Just create one without any scopes, that will be enough"})
+        public String modrinthKey = "InsertHere";
     }
 
 }
