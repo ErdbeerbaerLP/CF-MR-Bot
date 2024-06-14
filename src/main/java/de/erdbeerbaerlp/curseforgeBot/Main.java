@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     public static final HashMap<Long, CurseforgeProject> cfProjects = new HashMap<>();
     public static final HashMap<String, ModrinthProject> mrProjects = new HashMap<>();
-    private static final DCCommand[] commandList = new DCCommand[]{new AddProjectCommand(), new DelProjectCommand(), new FetchLatestFileCommand(), new SupportCommand()};
+    private static final DCCommand[] commandList = new DCCommand[]{new AddProjectCommand(), new DelProjectCommand(), new FetchLatestFileCommand(), new SupportCommand(), new ForceUpdateCheckCommand()};
     private static final HashMap<Long, DCCommand> registeredCMDs = new HashMap<>();
     public static JDA jda;
     public static DatabaseInterface ifa;
@@ -71,14 +71,17 @@ public class Main {
                 Thread.sleep(100); //Not totally spam the api, causing slowdown of the startup process
             }
             for (final String projID : c.data.mrProjects) {
-                System.out.println(projID + " Pid");
                 if (mrProjects.containsKey(projID)) {
                     mrProjects.get(projID).addChannel(c);
                 } else {
                     final Project project;
                     try {
                         project = mrAPI.projects().get(projID).get();
-                        mrProjects.put(projID, new ModrinthProject(project, c));
+                        if (project == null) {
+                            System.out.println(projID + " = Null");
+                            continue;
+                        }
+                        mrProjects.put(projID, new ModrinthProject(project, c, projID));
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
@@ -104,6 +107,7 @@ public class Main {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
+                        return;
                     }
                 }
             }
@@ -112,6 +116,7 @@ public class Main {
             @Override
             public void run() {
                 for (final ModrinthProject proj : mrProjects.values()) {
+                    if (proj.proj == null) continue;
                     System.out.println(proj.proj.getTitle());
                     try {
                         proj.run();
@@ -121,6 +126,7 @@ public class Main {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
+                        return;
                     }
                 }
             }

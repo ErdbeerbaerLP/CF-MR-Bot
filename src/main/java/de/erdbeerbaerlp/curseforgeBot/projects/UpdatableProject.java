@@ -1,8 +1,6 @@
 package de.erdbeerbaerlp.curseforgeBot.projects;
 
-import de.erdbeerbaerlp.curseforgeBot.Main;
 import de.erdbeerbaerlp.curseforgeBot.storage.json.DCChannel;
-import de.erdbeerbaerlp.curseforgeBot.storage.json.Root;
 
 import java.util.ArrayList;
 
@@ -14,18 +12,8 @@ public abstract class UpdatableProject implements Runnable {
         this.channels.add(channel);
     }
 
-    public void addChannel(long idLong, long projectID) {
-        for (DCChannel c : channels)
-            if (c != null && c.channelID == idLong) return;
-
-        final DCChannel cfChannel = new DCChannel(idLong, new Root());
-        cfChannel.data.projects = new Long[]{projectID};
-        this.channels.add(cfChannel);
-        Main.ifa.addChannelToCFProject(projectID, idLong);
-    }
-
     public boolean addChannel(DCChannel channel) {
-        System.out.println("Adding " + channel.channelID);
+        System.out.println("Adding " + channel.channelID + " to " + getTitle());
         return this.channels.add(channel);
     }
 

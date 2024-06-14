@@ -40,7 +40,7 @@ dependencies {
     embed("de.erdbeerbaerlp:cfcore:1.0.1") {
         changing = true
     }
-    embed 'dev.masecla:Modrinth4J:2.0.0'
+    embed 'dev.masecla:Modrinth4J:2.2.0'
     embed group: 'mysql', name: 'mysql-connector-java', version: '8.0.33'
 
 }

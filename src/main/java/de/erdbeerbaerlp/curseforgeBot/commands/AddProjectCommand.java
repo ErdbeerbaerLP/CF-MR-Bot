@@ -76,7 +76,7 @@ public class AddProjectCommand extends CommandDataImpl implements DCCommand {
                         } else {
                             final Project mod = Main.mrAPI.projects().get(projectID).get();
                             if (mod != null) {
-                                final ModrinthProject prj = new ModrinthProject(mod, Main.ifa.getOrCreateDCChannel(ev.getChannel().getIdLong()));
+                                final ModrinthProject prj = new ModrinthProject(mod, Main.ifa.getOrCreateDCChannel(ev.getChannel().getIdLong()), projectID);
                                 Main.ifa.addChannelToMRProject(projectID, ev.getChannel().getIdLong());
                                 final List<ProjectVersion> versions = Main.mrAPI.versions().getVersion(mod.getVersions()).get();
                                 Collections.reverse(versions);

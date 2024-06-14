@@ -190,8 +190,12 @@ public class DatabaseInterface implements AutoCloseable {
         return Main.ifa.getLatestCFFile(proj.id) < proj.latestFilesIndexes[0].fileId;
     }
 
-    public boolean isNewMRFile(Project proj, long time) throws SQLException {
-        return Main.ifa.getLatestMRFile(proj.getId()) < time;
+    public boolean isNewMRFile(Project proj, long time, String setID) throws SQLException {
+        final long latestMRFile = Main.ifa.getLatestMRFile(setID);
+        System.out.println("time: " + time);
+        System.out.println("latestTimestamp: " + latestMRFile);
+        System.out.println("New? :" + (latestMRFile < time));
+        return latestMRFile < time;
     }
 
     public class StatusThread implements Closeable {

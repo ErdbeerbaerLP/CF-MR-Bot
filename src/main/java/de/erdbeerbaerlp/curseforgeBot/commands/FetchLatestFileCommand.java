@@ -4,6 +4,7 @@ import de.erdbeerbaerlp.cfcore.CFCoreAPI;
 import de.erdbeerbaerlp.cfcore.json.CFFileIndex;
 import de.erdbeerbaerlp.cfcore.json.CFMod;
 import de.erdbeerbaerlp.curseforgeBot.Main;
+import masecla.modrinth4j.endpoints.version.GetProjectVersions;
 import masecla.modrinth4j.model.project.Project;
 import masecla.modrinth4j.model.version.ProjectVersion;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -13,7 +14,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
-import java.util.Collections;
 import java.util.List;
 
 public class FetchLatestFileCommand extends CommandDataImpl implements DCCommand {
@@ -23,7 +23,6 @@ public class FetchLatestFileCommand extends CommandDataImpl implements DCCommand
         final SubcommandData modrinth = new SubcommandData("modrinth", "Development command, fetches an modrinth project");
         curseforge.addOption(OptionType.INTEGER, "project-id", "ID of the Curseforge Project", true);
         modrinth.addOption(OptionType.STRING, "project-id", "ID of the Modrinth Project", true);
-
         addSubcommands(curseforge, modrinth);
     }
 
@@ -63,8 +62,7 @@ public class FetchLatestFileCommand extends CommandDataImpl implements DCCommand
                     final String projectID = projID.getAsString();
                     try {
                         final Project project = Main.mrAPI.projects().get(projectID).get();
-                        final List<ProjectVersion> versions = Main.mrAPI.versions().getVersion(project.getVersions()).get();
-                        Collections.reverse(versions);
+                        final List<ProjectVersion> versions = Main.mrAPI.versions().getProjectVersions(project.getSlug(), GetProjectVersions.GetProjectVersionsRequest.builder().featured(false).build()).get();
                         final EmbedBuilder b = new EmbedBuilder();
                         b.setTitle(project.getTitle(), "https://modrinth.com/project/" + project.getId());
                         b.addField("Primary Category", project.getCategories().get(0), false);
