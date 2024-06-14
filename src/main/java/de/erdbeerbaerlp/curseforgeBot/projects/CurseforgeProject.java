@@ -9,9 +9,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import org.apache.commons.collections4.IteratorUtils;
-
-import java.util.Iterator;
 
 public class CurseforgeProject extends UpdatableProject {
 
@@ -122,13 +119,13 @@ public class CurseforgeProject extends UpdatableProject {
 
     @Override
     public String getGameVersions() {
-        if (proj.latestFiles[0].gameVersions.length == 0)
+        if (proj.latestFilesIndexes[0].gameVersion.equals("undefined"))
             return "UNKNOWN";
-        String out = "";
-        for (Iterator<String> it = IteratorUtils.arrayIterator(proj.latestFiles[0].gameVersions); it.hasNext(); ) {
+        String out = proj.latestFilesIndexes[0].gameVersion;
+        /*for (Iterator<String> it = IteratorUtils.arrayIterator(proj.latestFilesIndexes[0].gameVersion); it.hasNext(); ) {
             final String s = it.next();
             out = out + s + (it.hasNext() ? ", " : "");
-        }
+        }*/
         return out;
     }
 
